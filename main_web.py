@@ -17,9 +17,9 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import uuid
 from contextlib import asynccontextmanager
-from fastapi import HTTPException
-from sqlalchemy import text
-import logging
+import glob
+import re
+
 
 # 載入 .env 檔案
 load_dotenv()   # 載入環境變數，像是 API 金鑰
@@ -37,12 +37,21 @@ if not DATABASE_URL:
 def get_db_connection():
     """取得 PostgreSQL 資料庫連線"""
     try:
-        # Render 的 PostgreSQL 需要 SSL 連線
-        conn = psycopg2.connect(
-            DATABASE_URL,
-            cursor_factory=RealDictCursor,
-            sslmode='require'  # Render 需要 SSL 連線
-        )
+        # 檢查是否為 Render 部署環境
+        if "render.com" in DATABASE_URL or "amazonaws.com" in DATABASE_URL:
+            # 雲端環境需要 SSL 連線
+            conn = psycopg2.connect(
+                DATABASE_URL,
+                cursor_factory=RealDictCursor,
+                sslmode='require'
+            )
+        else:
+            # 本地環境不需要 SSL 連線
+            conn = psycopg2.connect(
+                DATABASE_URL,
+                cursor_factory=RealDictCursor,
+                sslmode='disable'  # 本地測試時停用 SSL
+            )
         return conn
     except Exception as e:
         print(f"資料庫連線失敗: {e}")
@@ -122,6 +131,7 @@ app = FastAPI(
 # 掛載 /static 用來提供 CSS、JS 檔案
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
 # 設定 CORS
 app.add_middleware(
     CORSMiddleware,
@@ -176,6 +186,12 @@ class ChatHistoryItem(BaseModel):
 class ChatHistoryResponse(BaseModel):
     history: List[ChatHistoryItem]
     total_count: int
+
+# 新增圖片回應模型
+class ImageResponse(BaseModel):
+    image_url: str
+    image_name: str
+    message: str
 
 # 工具函數
 def hash_password(password: str) -> str:
@@ -349,14 +365,38 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"系統初始化失敗：{str(e)}")
 
+
+# 在 ask_question 函數中新增圖片測試邏輯
 @app.post("/ask", response_model=AnswerResponse)
 async def ask_question(request: QuestionRequest, current_user: str = Depends(get_current_user)):
     """回答問題（需登入）"""
     global rag_instance
 
+    # 檢查是否為圖片測試指令
+    if re.match(r'^\d+$', request.question.strip()):
+        try:
+            image_id = int(request.question.strip())
+            image_response = await get_test_image(image_id, current_user)
+
+            # 記錄問答
+            start_time = datetime.now()
+            response_time = (datetime.now() - start_time).total_seconds()
+            log_question(current_user, request.question, f"顯示圖片：{image_response.image_name}", 0, response_time)
+
+            return AnswerResponse(
+                answer=f"IMAGE:{image_response.image_url}|{image_response.message}",
+                sources=[]
+            )
+        except HTTPException as e:
+            return AnswerResponse(
+                answer=f"❌ {e.detail}",
+                sources=[]
+            )
+
     if not rag_instance:
         raise HTTPException(status_code=400, detail="系統尚未初始化")
 
+    # 原有的 RAG 問答邏輯...
     try:
         start_time = datetime.now()
         answer, sources = rag_instance.ask(request.question)
@@ -508,149 +548,66 @@ async def clear_chat_history(current_user: str = Depends(get_current_user)):
 
     return {"message": f"已清除 {deleted_count} 筆歷史紀錄"}
 
-# 添加資料庫查看端點
-@app.get("/debug/db-status")
-async def check_database_status():
-    """檢查資料庫連接狀態 (psycopg2 版本)"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(r'(\d+)', s)]
 
-        # 測試連接
-        cursor.execute("SELECT version()")
-        version = cursor.fetchone()["version"]
+@app.get("/test/image/{image_id}")
+async def get_test_image(image_id: int, current_user: str = Depends(get_current_user)):
+    """測試圖片顯示功能"""
 
-        # 列出所有資料表
-        cursor.execute("""
-            SELECT table_name 
-            FROM information_schema.tables 
-            WHERE table_schema = 'public'
-        """)
-        tables = [row["table_name"] for row in cursor.fetchall()]
+    # 檢查 images 資料夾是否存在
+    images_folder = "./static/images"
+    if not os.path.exists(images_folder):
+        raise HTTPException(status_code=404, detail="圖片資料夾不存在")
 
-        cursor.close()
-        conn.close()
+    # 獲取資料夾中的所有圖片檔案
+    image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.bmp', '*.webp']
+    image_files =set()
+    for ext in image_extensions:
+        image_files.update(glob.glob(os.path.join(images_folder, ext)))
+        image_files.update(glob.glob(os.path.join(images_folder, ext.upper())))
 
-        return {
-            "status": "connected",
-            "database_version": version,
-            "tables": tables,
-            "table_count": len(tables)
-        }
+    # 按檔名排序
+    image_files = sorted(list(image_files), key=natural_sort_key)
 
-    except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e),
-            "message": "無法連接到資料庫"
-        }
-        
-@app.get("/debug/tables/{table_name}")
-async def view_table_content(table_name: str, limit: int = 10):
-    """查看指定資料表內容 (psycopg2 版本)"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    if not image_files:
+        raise HTTPException(status_code=404, detail="沒有找到任何圖片")
 
-        # 檢查資料表是否存在
-        cursor.execute("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND table_name = %s
-            )
-        """, (table_name,))
-        if not cursor.fetchone()["exists"]:
-            cursor.close()
-            conn.close()
-            raise HTTPException(status_code=404, detail=f"資料表 {table_name} 不存在")
+    if image_id < 1 or image_id > len(image_files):
+        raise HTTPException(status_code=404, detail=f"圖片編號無效，請輸入 1 到 {len(image_files)} 之間的數字")
 
-        # 取得欄位結構
-        cursor.execute("""
-            SELECT column_name, data_type 
-            FROM information_schema.columns 
-            WHERE table_schema = 'public' 
-            AND table_name = %s
-            ORDER BY ordinal_position
-        """, (table_name,))
-        columns = [{"name": row["column_name"], "type": row["data_type"]} for row in cursor.fetchall()]
+    selected_image = image_files[image_id - 1]
+    image_name = os.path.basename(selected_image)
 
-        # 取得資料
-        cursor.execute(f"SELECT * FROM {table_name} ORDER BY 1 LIMIT %s", (limit,))
-        records = cursor.fetchall()
+    return ImageResponse(
+        image_url=f"/static/images/{image_name}",
+        image_name=image_name,
+        message=f"顯示第 {image_id} 張圖片：{image_name}"
+    )
 
-        # 格式化資料
-        rows = []
-        for record in records:
-            row_data = {}
-            for col, val in record.items():
-                if hasattr(val, "isoformat"):  # datetime
-                    val = val.isoformat()
-                elif isinstance(val, bytes):
-                    val = val.decode("utf-8", errors="ignore")
-                row_data[col] = val
-            rows.append(row_data)
 
-        # 取得總筆數
-        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-        total_count = cursor.fetchone()["count"]
+@app.get("/test/image-list")
+async def get_image_list(current_user: str = Depends(get_current_user)):
+    """獲取所有測試圖片列表"""
+    images_folder = "./static/images"
+    if not os.path.exists(images_folder):
+        return {"images": [], "count": 0, "message": "圖片資料夾不存在"}
 
-        cursor.close()
-        conn.close()
+    image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.bmp', '*.webp']
+    image_files = []
+    for ext in image_extensions:
+        image_files.extend(glob.glob(os.path.join(images_folder, ext)))
+        image_files.extend(glob.glob(os.path.join(images_folder, ext.upper())))
 
-        return {
-            "table_name": table_name,
-            "columns": columns,
-            "rows": rows,
-            "showing": len(rows),
-            "total": total_count
-        }
+    image_files.sort()
+    image_names = [os.path.basename(f) for f in image_files]
 
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"查詢錯誤: {str(e)}")
-
-@app.get("/debug/quick-stats")
-async def get_quick_stats():
-    """快速統計資訊 (psycopg2 版本)"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        stats = {}
-        common_tables = ["users", "documents", "chat_history", "file_uploads", "questions_log"]
-
-        for table in common_tables:
-            try:
-                # 檢查資料表是否存在
-                cursor.execute("""
-                    SELECT EXISTS (
-                        SELECT FROM information_schema.tables 
-                        WHERE table_schema = 'public' 
-                        AND table_name = %s
-                    )
-                """, (table,))
-                if cursor.fetchone()["exists"]:
-                    cursor.execute(f"SELECT COUNT(*) FROM {table}")
-                    stats[table] = cursor.fetchone()["count"]
-            except Exception:
-                continue  # 忽略錯誤的表
-
-        cursor.close()
-        conn.close()
-
-        return {
-            "status": "success",
-            "table_stats": stats,
-            "timestamp": datetime.now().isoformat()
-        }
-
-    except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e)
-        }
+    return {
+        "images": image_names,
+        "count": len(image_names),
+        "message": f"找到 {len(image_names)} 張圖片"
+    }
 
 # 新增健康檢查端點（防休眠用）
 @app.get("/health")
