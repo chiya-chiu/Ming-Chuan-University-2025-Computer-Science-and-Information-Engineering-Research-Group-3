@@ -1,0 +1,36 @@
+# LangChain 生態系統
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-openai>=0.2.0
+
+# Web 框架
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+
+# 數據驗證和模型
+pydantic>=2.5.0
+
+# 檔案處理
+python-multipart
+aiofiles
+PyPDF
+
+# 環境變數
+python-dotenv
+
+# AI/ML
+openai
+chromadb
+
+# 資料庫
+sqlalchemy
+psycopg2-binary>=2.9.7
+
+# 認證和安全
+PyJWT
+bcrypt
+passlib[bcrypt]>=1.7.4
+python-jose[cryptography]>=3.3.0
+
+# 模板引擎
+jinja2
