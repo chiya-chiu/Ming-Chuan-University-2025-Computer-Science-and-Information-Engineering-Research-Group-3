@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: rag-website
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main_web.py
+    healthCheckPath: /status
+    envVars:
+      - key: SECRET_KEY
+        value: seventeen17
+      - key: OPENAI_API_KEY
+        value: sk-WDLAdemRxHEUPoFDEk49mJ5XqCDicIRum6PmeHmFjuhOVNDc
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rag-users-db  # 修正：要對應下面資料庫的名稱
+          property: connectionString
+      - key: PYTHONPATH
+        value: .
+    
+databases:
+  - name: rag-users-db  # 修正：名稱要一致
+    databaseName: ragdb
+    user: raguser
+    plan: free
