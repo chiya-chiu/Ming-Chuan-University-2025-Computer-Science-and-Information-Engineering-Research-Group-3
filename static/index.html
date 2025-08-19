@@ -434,31 +434,60 @@
                 timeHtml = `<div class="message-time">${date.toLocaleString('zh-TW')}</div>`;
             }
             
-            // 來源資訊（目前已經移除，所以這部分可以省略）
-            let sourcesHtml = '';
-            // if (sources && sources.length > 0) {
-            //     sourcesHtml = '<div class="sources"><strong>📚 參考來源：</strong>';
-            //     sources.forEach((source, index) => {
-            //         sourcesHtml += `<div class="source-item">
-            //             ${index + 1}. 📄 ${source.source} (第 ${source.page} 頁)
-            //             <br><small>內容預覽：${source.content_preview}</small>
-            //         </div>`;
-            //     });
-            //     sourcesHtml += '</div>';
-            // }
-            //${content.replace(/\n/g, '<br>')}
+            // 檢查是否為圖片回應
+            let contentHtml = '';
+            if (sender === 'bot' && content.startsWith('IMAGE:')) {
+                const parts = content.split('|');
+                const imageUrl = parts[0].substring(6); // 移除 "IMAGE:" 前綴
+                const message = parts[1] || '';
+                
+                contentHtml = `
+                    <div class="image-response">
+                        <p>${message}</p>
+                        <img src="${imageUrl}" alt="測試圖片" class="response-image" onclick="openImageModal('${imageUrl}')">
+                    </div>
+                `;
+            } else {
+                contentHtml = sender === 'bot' ? renderMarkdownWithMath(content) : content.replace(/\n/g, '<br>');
+            }
+            
             messageDiv.innerHTML = `
                 <div class="message-content">
-                    ${sender === 'bot' ? renderMarkdownWithMath(content) : content.replace(/\n/g, '<br>')}
-                    
-                    ${sourcesHtml}
+                    ${contentHtml}
                 </div>
                 ${timeHtml}
             `;
 
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+// 新增圖片放大功能
+function openImageModal(imageUrl) {
+    const modal = document.createElement('div');
+    modal.className = 'image-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeImageModal()">&times;</span>
+            <img src="${imageUrl}" alt="放大圖片" class="modal-image">
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // 點擊背景關閉
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeImageModal();
         }
+    });
+}
+
+function closeImageModal() {
+    const modal = document.querySelector('.image-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
 
         // 載入聊天歷史
         async function loadChatHistory() {
