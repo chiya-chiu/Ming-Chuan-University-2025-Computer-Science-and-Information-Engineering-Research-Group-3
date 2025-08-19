@@ -511,98 +511,93 @@ async def clear_chat_history(current_user: str = Depends(get_current_user)):
 # 添加資料庫查看端點
 @app.get("/debug/db-status")
 async def check_database_status():
-    """檢查資料庫連接狀態"""
+    """檢查資料庫連接狀態 (psycopg2 版本)"""
     try:
-        # 假設你有 get_db 函數
-        db = next(get_db())
-        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
         # 測試連接
-        result = db.execute(text("SELECT version()"))
-        version = result.scalar()
-        
+        cursor.execute("SELECT version()")
+        version = cursor.fetchone()["version"]
+
         # 列出所有資料表
-        tables_result = db.execute(text("""
+        cursor.execute("""
             SELECT table_name 
             FROM information_schema.tables 
             WHERE table_schema = 'public'
-        """))
-        tables = [row[0] for row in tables_result]
-        
-        db.close()
-        
+        """)
+        tables = [row["table_name"] for row in cursor.fetchall()]
+
+        cursor.close()
+        conn.close()
+
         return {
             "status": "connected",
             "database_version": version,
             "tables": tables,
             "table_count": len(tables)
         }
-        
+
     except Exception as e:
         return {
             "status": "error",
             "error": str(e),
             "message": "無法連接到資料庫"
         }
-
+        
 @app.get("/debug/tables/{table_name}")
 async def view_table_content(table_name: str, limit: int = 10):
-    """查看指定資料表內容"""
+    """查看指定資料表內容 (psycopg2 版本)"""
     try:
-        db = next(get_db())
-        
-        # 基本的安全檢查
-        if not table_name.replace('_', '').isalnum():
-            raise HTTPException(status_code=400, detail="無效的資料表名稱")
-        
-        # 先檢查資料表是否存在
-        exists_result = db.execute(text("""
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # 檢查資料表是否存在
+        cursor.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
                 WHERE table_schema = 'public' 
-                AND table_name = :table_name
+                AND table_name = %s
             )
-        """), {"table_name": table_name})
-        
-        if not exists_result.scalar():
+        """, (table_name,))
+        if not cursor.fetchone()["exists"]:
+            cursor.close()
+            conn.close()
             raise HTTPException(status_code=404, detail=f"資料表 {table_name} 不存在")
-        
-        # 取得資料表結構
-        columns_result = db.execute(text("""
+
+        # 取得欄位結構
+        cursor.execute("""
             SELECT column_name, data_type 
             FROM information_schema.columns 
             WHERE table_schema = 'public' 
-            AND table_name = :table_name
+            AND table_name = %s
             ORDER BY ordinal_position
-        """), {"table_name": table_name})
-        
-        columns = [{"name": row[0], "type": row[1]} for row in columns_result]
-        
+        """, (table_name,))
+        columns = [{"name": row["column_name"], "type": row["data_type"]} for row in cursor.fetchall()]
+
         # 取得資料
-        data_result = db.execute(text(f"""
-            SELECT * FROM {table_name} 
-            ORDER BY 1 
-            LIMIT :limit
-        """), {"limit": limit})
-        
+        cursor.execute(f"SELECT * FROM {table_name} ORDER BY 1 LIMIT %s", (limit,))
+        records = cursor.fetchall()
+
+        # 格式化資料
         rows = []
-        for row in data_result:
+        for record in records:
             row_data = {}
-            for i, col_info in enumerate(columns):
-                value = row[i]
-                # 處理特殊類型
-                if hasattr(value, 'isoformat'):  # datetime
-                    value = value.isoformat()
-                elif isinstance(value, bytes):
-                    value = value.decode('utf-8', errors='ignore')
-                row_data[col_info["name"]] = value
+            for col, val in record.items():
+                if hasattr(val, "isoformat"):  # datetime
+                    val = val.isoformat()
+                elif isinstance(val, bytes):
+                    val = val.decode("utf-8", errors="ignore")
+                row_data[col] = val
             rows.append(row_data)
-        
+
         # 取得總筆數
-        count_result = db.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-        total_count = count_result.scalar()
-        
-        db.close()
-        
+        cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+        total_count = cursor.fetchone()["count"]
+
+        cursor.close()
+        conn.close()
+
         return {
             "table_name": table_name,
             "columns": columns,
@@ -610,7 +605,7 @@ async def view_table_content(table_name: str, limit: int = 10):
             "showing": len(rows),
             "total": total_count
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -618,41 +613,39 @@ async def view_table_content(table_name: str, limit: int = 10):
 
 @app.get("/debug/quick-stats")
 async def get_quick_stats():
-    """快速統計資訊"""
+    """快速統計資訊 (psycopg2 版本)"""
     try:
-        db = next(get_db())
-        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
         stats = {}
-        
-        # 常見的資料表統計
-        common_tables = ["users", "documents", "chat_history", "file_uploads"]
-        
+        common_tables = ["users", "documents", "chat_history", "file_uploads", "questions_log"]
+
         for table in common_tables:
             try:
                 # 檢查資料表是否存在
-                exists_result = db.execute(text("""
+                cursor.execute("""
                     SELECT EXISTS (
                         SELECT FROM information_schema.tables 
                         WHERE table_schema = 'public' 
-                        AND table_name = :table_name
+                        AND table_name = %s
                     )
-                """), {"table_name": table})
-                
-                if exists_result.scalar():
-                    count_result = db.execute(text(f"SELECT COUNT(*) FROM {table}"))
-                    stats[table] = count_result.scalar()
-                    
+                """, (table,))
+                if cursor.fetchone()["exists"]:
+                    cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                    stats[table] = cursor.fetchone()["count"]
             except Exception:
-                continue  # 略過錯誤的資料表
-        
-        db.close()
-        
+                continue  # 忽略錯誤的表
+
+        cursor.close()
+        conn.close()
+
         return {
             "status": "success",
             "table_stats": stats,
-            "timestamp": "now"
+            "timestamp": datetime.now().isoformat()
         }
-        
+
     except Exception as e:
         return {
             "status": "error",
