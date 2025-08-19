@@ -17,6 +17,9 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import uuid
 from contextlib import asynccontextmanager
+from fastapi import HTTPException
+from sqlalchemy import text
+import logging
 
 # 載入 .env 檔案
 load_dotenv()   # 載入環境變數，像是 API 金鑰
@@ -504,6 +507,157 @@ async def clear_chat_history(current_user: str = Depends(get_current_user)):
     conn.close()
 
     return {"message": f"已清除 {deleted_count} 筆歷史紀錄"}
+
+# 添加資料庫查看端點
+@app.get("/debug/db-status")
+async def check_database_status():
+    """檢查資料庫連接狀態"""
+    try:
+        # 假設你有 get_db 函數
+        db = next(get_db())
+        
+        # 測試連接
+        result = db.execute(text("SELECT version()"))
+        version = result.scalar()
+        
+        # 列出所有資料表
+        tables_result = db.execute(text("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        """))
+        tables = [row[0] for row in tables_result]
+        
+        db.close()
+        
+        return {
+            "status": "connected",
+            "database_version": version,
+            "tables": tables,
+            "table_count": len(tables)
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "無法連接到資料庫"
+        }
+
+@app.get("/debug/tables/{table_name}")
+async def view_table_content(table_name: str, limit: int = 10):
+    """查看指定資料表內容"""
+    try:
+        db = next(get_db())
+        
+        # 基本的安全檢查
+        if not table_name.replace('_', '').isalnum():
+            raise HTTPException(status_code=400, detail="無效的資料表名稱")
+        
+        # 先檢查資料表是否存在
+        exists_result = db.execute(text("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = :table_name
+            )
+        """), {"table_name": table_name})
+        
+        if not exists_result.scalar():
+            raise HTTPException(status_code=404, detail=f"資料表 {table_name} 不存在")
+        
+        # 取得資料表結構
+        columns_result = db.execute(text("""
+            SELECT column_name, data_type 
+            FROM information_schema.columns 
+            WHERE table_schema = 'public' 
+            AND table_name = :table_name
+            ORDER BY ordinal_position
+        """), {"table_name": table_name})
+        
+        columns = [{"name": row[0], "type": row[1]} for row in columns_result]
+        
+        # 取得資料
+        data_result = db.execute(text(f"""
+            SELECT * FROM {table_name} 
+            ORDER BY 1 
+            LIMIT :limit
+        """), {"limit": limit})
+        
+        rows = []
+        for row in data_result:
+            row_data = {}
+            for i, col_info in enumerate(columns):
+                value = row[i]
+                # 處理特殊類型
+                if hasattr(value, 'isoformat'):  # datetime
+                    value = value.isoformat()
+                elif isinstance(value, bytes):
+                    value = value.decode('utf-8', errors='ignore')
+                row_data[col_info["name"]] = value
+            rows.append(row_data)
+        
+        # 取得總筆數
+        count_result = db.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+        total_count = count_result.scalar()
+        
+        db.close()
+        
+        return {
+            "table_name": table_name,
+            "columns": columns,
+            "rows": rows,
+            "showing": len(rows),
+            "total": total_count
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"查詢錯誤: {str(e)}")
+
+@app.get("/debug/quick-stats")
+async def get_quick_stats():
+    """快速統計資訊"""
+    try:
+        db = next(get_db())
+        
+        stats = {}
+        
+        # 常見的資料表統計
+        common_tables = ["users", "documents", "chat_history", "file_uploads"]
+        
+        for table in common_tables:
+            try:
+                # 檢查資料表是否存在
+                exists_result = db.execute(text("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables 
+                        WHERE table_schema = 'public' 
+                        AND table_name = :table_name
+                    )
+                """), {"table_name": table})
+                
+                if exists_result.scalar():
+                    count_result = db.execute(text(f"SELECT COUNT(*) FROM {table}"))
+                    stats[table] = count_result.scalar()
+                    
+            except Exception:
+                continue  # 略過錯誤的資料表
+        
+        db.close()
+        
+        return {
+            "status": "success",
+            "table_stats": stats,
+            "timestamp": "now"
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e)
+        }
 
 # 新增健康檢查端點（防休眠用）
 @app.get("/health")
