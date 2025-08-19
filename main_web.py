@@ -635,6 +635,139 @@ async def health_check():
             "error": str(e)
         }
 
+@app.get("/debug/database")
+async def debug_database():
+    """調試資料庫連線狀態"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 測試基本連線
+        cursor.execute("SELECT version();")
+        version = cursor.fetchone()
+        
+        # 檢查表格是否存在
+        cursor.execute("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        """)
+        tables = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "database_version": version['version'],
+            "tables": [table['table_name'] for table in tables],
+            "connection": "OK"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "connection": "FAILED"
+        }
+
+@app.get("/debug/users-table")
+async def debug_users_table():
+    """調試 users 表格狀態"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 檢查 users 表格是否存在
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'users'
+            );
+        """)
+        table_exists = cursor.fetchone()['exists']
+        
+        if not table_exists:
+            cursor.close()
+            conn.close()
+            return {
+                "status": "error",
+                "message": "users 表格不存在",
+                "table_exists": False
+            }
+        
+        # 獲取表格結構
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable 
+            FROM information_schema.columns 
+            WHERE table_name = 'users'
+            ORDER BY ordinal_position;
+        """)
+        columns = cursor.fetchall()
+        
+        # 獲取使用者數量
+        cursor.execute("SELECT COUNT(*) as count FROM users")
+        user_count = cursor.fetchone()['count']
+        
+        # 獲取前 5 個使用者（不包含敏感資訊）
+        cursor.execute("""
+            SELECT user_id, username, email, created_at, is_active, is_admin 
+            FROM users 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        """)
+        sample_users = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "table_exists": True,
+            "user_count": user_count,
+            "columns": [
+                {
+                    "name": col['column_name'],
+                    "type": col['data_type'],
+                    "nullable": col['is_nullable']
+                } for col in columns
+            ],
+            "sample_users": [dict(user) for user in sample_users]
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "無法查詢 users 表格"
+        }
+
+@app.get("/debug/init-check")
+async def debug_init_check():
+    """檢查初始化狀態和環境變數"""
+    return {
+        "database_url_set": bool(os.getenv("DATABASE_URL")),
+        "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
+        "secret_key_set": bool(os.getenv("SECRET_KEY")),
+        "rag_initialized": rag_instance is not None,
+        "pdf_folder_exists": os.path.exists("./pdfFiles")
+    }
+
+@app.post("/debug/force-init-db")
+async def force_init_database():
+    """強制重新初始化資料庫（僅供調試使用）"""
+    try:
+        init_database()
+        return {
+            "status": "success",
+            "message": "資料庫重新初始化完成"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"資料庫初始化失敗：{str(e)}"
+        }
+
 if __name__ == "__main__":
     import uvicorn
 
