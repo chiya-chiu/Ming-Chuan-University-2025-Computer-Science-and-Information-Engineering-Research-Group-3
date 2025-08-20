@@ -748,7 +748,7 @@ class RAGHelper:
 
     def ask(self, query):
         if not self.retrieval_chain:
-            raise ValueError("請先執行 setup_qa_chain()")
+            raise ValueError("請先執行 setup_retrieval_chain()")
         try:
             result = self.retrieval_chain.invoke({"input": query})    #將使用者的問題傳給問答鏈，鏈內部會檢索並將檢索到的段落和問題交給大語言模型
             return result["answer"], result["context"]     # result["answer"] 是 語言模型給的答案，result["context"]  是檢索到的原始段落
