@@ -625,6 +625,8 @@ class RAGHelper:
         self.pdf_folder = pdf_folder    # 儲存 PDF 檔案的 PATH
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
+        self.pdf_target_len = pdf_target_len       
+        self.pdf_tolerance = pdf_tolerance  
         self.vectorstore = None
         self.retrieval_chain = None
 
@@ -701,11 +703,25 @@ class RAGHelper:
 
                 for path in file_paths:
                     try:
-                        print(f"讀取中: {os.path.basename(path)}")
-                        pages = await self.load_any_file_async(path)  # 讀檔案
-                        chunks = self._split_documents(pages)  # 切割檔案
-                        all_chunks.extend(chunks)  # 加入 list
-                        print(f" {os.path.basename(path)} 分割完成，共 {len(chunks)} 段")
+                        fname = os.path.basename(path)
+                        print(f"讀取中: {fname}")
+
+                        if Path(path).suffix.lower() == ".pdf":
+                            # ★ PDF 使用智慧切割（標題偵測 / 頁眉頁腳過濾 / 細切 + 智慧合併）
+                            docs = chunk_pdf_full_page(
+                                pdf_path=path,
+                                target_len=self.pdf_target_len,
+                                tol=self.pdf_tolerance
+                            )
+                            all_chunks.extend(docs)
+                            print(f" {fname}（PDF 智慧切）完成，共 {len(docs)} 段")
+                        else:
+                            # 其它副檔名維持原本流程
+                            pages = await self.load_any_file_async(path)
+                            chunks = self._split_documents(pages)
+                            all_chunks.extend(chunks)
+                            print(f" {fname} 分割完成，共 {len(chunks)} 段")
+
                     except Exception as e:
                         print(f"載入 {os.path.basename(path)} 時發生錯誤: {e}")
 
