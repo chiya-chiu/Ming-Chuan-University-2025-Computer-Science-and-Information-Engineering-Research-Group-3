@@ -153,12 +153,22 @@ security = HTTPBearer()
 
 # 資料模型 - 修改為學習追蹤版本
 class LearnerRegister(BaseModel):
-    user_name: str      # 改為 user_name
+    username: str = None     # 前端舊欄位
+    user_name: str = None    # 新欄位
     password: str
+    
+    def get_username(self):
+        """取得使用者名稱，支援新舊欄位"""
+        return self.user_name if self.user_name else self.username
 
 class LearnerLogin(BaseModel):
-    user_name: str      # 改為 user_name
+    username: str = None     # 前端舊欄位
+    user_name: str = None    # 新欄位
     password: str
+    
+    def get_username(self):
+        """取得使用者名稱，支援新舊欄位"""
+        return self.user_name if self.user_name else self.username
 
 class Token(BaseModel):
     access_token: str
@@ -339,8 +349,13 @@ async def register_learner(learner: LearnerRegister):
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    # 取得使用者名稱（支援新舊欄位）
+    username = learner.get_username()
+    if not username:
+        raise HTTPException(status_code=400, detail="請提供使用者名稱")
+
     # 檢查學習者是否已存在
-    cursor.execute("SELECT * FROM learners WHERE user_name = %s", (learner.user_name,))
+    cursor.execute("SELECT * FROM learners WHERE user_name = %s", (username,))
     if cursor.fetchone():
         cursor.close()
         conn.close()
@@ -353,7 +368,7 @@ async def register_learner(learner: LearnerRegister):
     cursor.execute('''
         INSERT INTO learners (user_id, user_name, password_hash, last_count_reset_date)
         VALUES (%s, %s, %s, %s)
-    ''', (user_id, learner.user_name, password_hash, datetime.now().date()))
+    ''', (user_id, username, password_hash, datetime.now().date()))
 
     conn.commit()
     cursor.close()
@@ -364,7 +379,12 @@ async def register_learner(learner: LearnerRegister):
 @app.post("/login", response_model=Token)
 async def login_learner(learner: LearnerLogin):
     """學習者登入"""
-    db_learner = get_learner_from_db(user_name=learner.user_name)
+    # 取得使用者名稱（支援新舊欄位）
+    username = learner.get_username()
+    if not username:
+        raise HTTPException(status_code=400, detail="請提供使用者名稱")
+        
+    db_learner = get_learner_from_db(user_name=username)
 
     if not db_learner or not verify_password(learner.password, db_learner['password_hash']):
         raise HTTPException(
