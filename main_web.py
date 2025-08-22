@@ -79,7 +79,7 @@ def init_database():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS learners (
             id SERIAL PRIMARY KEY,
-            user_name VARCHAR(255) UNIQUE NOT NULL,     -- 學習者姓名
+            username VARCHAR(255) UNIQUE NOT NULL,     -- 學習者姓名
             user_id VARCHAR(255) UNIQUE NOT NULL,       -- 學習者唯一 ID
             password_hash VARCHAR(255) NOT NULL,        -- 密碼雜湊值
             last_visit_time TIMESTAMP,                  -- 最後點擊學習網站的時間
