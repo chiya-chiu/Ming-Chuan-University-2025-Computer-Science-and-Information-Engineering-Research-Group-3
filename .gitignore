@@ -1,0 +1,42 @@
+# 環境設定檔案
+.env
+*.env
+
+# 資料庫檔案
+*.db
+*.sqlite
+*.sqlite3
+default.sqlite
+rag_users.db
+
+# 快取和索引檔案
+__pycache__/
+*.pyc
+*.pyo
+my_faiss_index/
+enhanced_faiss_index/
+trulens_env_new/
+
+# Enhanced RAG Helper 產生檔案
+chart_metadata.json
+temp_enhanced_docs/
+pdfFiles/enhanced_docs/
+
+# Obsidian 設定
+.obsidian/
+
+# 測試資料 - 不上傳multi_data資料夾
+pdfFiles/multi_data/
+
+# PDF圖表切割結果 - 不上傳處理結果
+test_ImageCut_result/
+modules/pdf_Cutting_TextReplaceImage/test_ImageCut_result/
+
+# 虛擬環境
+pdf_cutting_env/
+
+# 其他臨時檔案
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
