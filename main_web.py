@@ -71,15 +71,15 @@ def test_db_connection():
 
 # 資料庫初始化 - 修改為學習追蹤系統
 def init_database():
-    """初始化 PostgreSQL 資料庫 - 學習追蹤版本"""
+    """初始化 PostgreSQL 資料庫 - 學習追蹤版本（修正欄位名）"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 學習者資料表
+    # 學習者資料表 - 確保使用 user_name
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS learners (
             id SERIAL PRIMARY KEY,
-            username VARCHAR(255) UNIQUE NOT NULL,     -- 學習者姓名
+            user_name VARCHAR(255) UNIQUE NOT NULL,     -- 學習者姓名（統一使用user_name）
             user_id VARCHAR(255) UNIQUE NOT NULL,       -- 學習者唯一 ID
             password_hash VARCHAR(255) NOT NULL,        -- 密碼雜湊值
             last_visit_time TIMESTAMP,                  -- 最後點擊學習網站的時間
@@ -697,6 +697,209 @@ async def get_all_learners():
         "learners": [dict(learner) for learner in learners],
         "total_count": len(learners)
     }
+
+@app.get("/debug/fix-schema")
+async def fix_database_schema():
+    """修復資料庫表格結構 - 統一欄位名為user_name"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        operations_performed = []
+        
+        # 檢查learners表格是否存在
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'learners'
+            );
+        """)
+        table_exists = cursor.fetchone()[0]
+        
+        if not table_exists:
+            # 如果表格不存在，建立正確的表格
+            init_database()
+            operations_performed.append("建立了learners表格")
+        else:
+            # 檢查欄位
+            cursor.execute("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'learners' AND column_name IN ('username', 'user_name')
+            """)
+            columns = [row[0] for row in cursor.fetchall()]
+            
+            # 如果有username欄位但沒有user_name，重新命名
+            if 'username' in columns and 'user_name' not in columns:
+                cursor.execute("ALTER TABLE learners RENAME COLUMN username TO user_name")
+                operations_performed.append("重新命名 username -> user_name")
+            
+            # 如果既沒有username也沒有user_name，新增user_name
+            elif not any(col in ['username', 'user_name'] for col in columns):
+                cursor.execute("ALTER TABLE learners ADD COLUMN user_name VARCHAR(255) UNIQUE")
+                operations_performed.append("新增 user_name 欄位")
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "message": "資料庫表格結構修復完成",
+            "operations": operations_performed
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"修復失敗: {str(e)}",
+            "error_type": type(e).__name__
+        }
+
+@app.get("/debug/users-table")
+async def debug_users_table():
+    """除錯使用者表格 - 檢查表格結構和資料"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 檢查表格是否存在
+        cursor.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'learners'
+            );
+        """)
+        table_exists = cursor.fetchone()[0]
+        
+        if not table_exists:
+            cursor.close()
+            conn.close()
+            return {
+                "status": "error", 
+                "message": "learners 表格不存在",
+                "table_exists": False,
+                "suggestion": "存取 /debug/fix-schema 來建立表格"
+            }
+        
+        # 取得表格結構
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns 
+            WHERE table_name = 'learners'
+            ORDER BY ordinal_position;
+        """)
+        columns = cursor.fetchall()
+        
+        # 取得資料數量
+        cursor.execute("SELECT COUNT(*) as count FROM learners")
+        count_result = cursor.fetchone()
+        total_count = count_result['count'] if count_result else 0
+        
+        # 取得範例資料（不包含密碼）
+        cursor.execute("""
+            SELECT user_name, user_id, last_visit_time, today_visit_count, 
+                   total_questions, created_at, is_active
+            FROM learners 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        """)
+        sample_data = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "table_exists": True,
+            "columns": [dict(col) for col in columns],
+            "total_records": total_count,
+            "sample_data": [dict(row) for row in sample_data],
+            "message": f"learners 表格存在，共有 {total_count} 筆記錄"
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"查詢失敗: {str(e)}",
+            "error_type": type(e).__name__
+        }
+
+@app.post("/debug/create-test-user")
+async def debug_create_test_user():
+    """建立測試使用者"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 建立測試使用者
+        test_user_id = str(uuid.uuid4())
+        test_username = f"test_user_{datetime.now().strftime('%H%M%S')}"  # 新增時間戳記避免重複
+        test_password = hash_password("123456")
+        
+        cursor.execute('''
+            INSERT INTO learners (user_id, user_name, password_hash, last_count_reset_date)
+            VALUES (%s, %s, %s, %s)
+        ''', (test_user_id, test_username, test_password, datetime.now().date()))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "message": "測試使用者建立成功",
+            "test_user": {
+                "username": test_username,
+                "password": "123456", 
+                "user_id": test_user_id
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"建立測試使用者失敗: {str(e)}",
+            "error_type": type(e).__name__
+        }
+
+@app.get("/debug/clear-all-data")
+async def debug_clear_all_data():
+    """清除所有資料（危險操作）"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 按依賴順序刪除資料
+        cursor.execute("DELETE FROM visit_logs")
+        visit_deleted = cursor.rowcount
+        
+        cursor.execute("DELETE FROM learning_questions") 
+        questions_deleted = cursor.rowcount
+        
+        cursor.execute("DELETE FROM learners")
+        learners_deleted = cursor.rowcount
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "message": "所有資料已清除",
+            "deleted": {
+                "visit_logs": visit_deleted,
+                "learning_questions": questions_deleted,
+                "learners": learners_deleted
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"清除資料失敗: {str(e)}",
+            "error_type": type(e).__name__
+        }
 
 if __name__ == "__main__":
     import uvicorn
