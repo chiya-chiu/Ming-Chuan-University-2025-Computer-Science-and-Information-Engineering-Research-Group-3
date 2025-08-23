@@ -1,4 +1,3 @@
-你說：
 import os
 import asyncio
 import hashlib
