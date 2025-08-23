@@ -351,7 +351,7 @@ async def get_current_user_info(current_user: str = Depends(get_current_user)):
     "username": db_user['username'],
     "email": db_user['email'] if db_user['email'] else "",
     "created_at": str(db_user['created_at']),
-    "last_login": datetime.now(timezone.utc).isoformat(),
+    "last_login": str(db_user['last_login']) if db_user['last_login'] else None,
     "is_active": db_user['is_active'],
     "is_admin": db_user['is_admin']
 }
