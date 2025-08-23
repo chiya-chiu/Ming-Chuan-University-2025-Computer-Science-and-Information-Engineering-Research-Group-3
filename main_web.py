@@ -315,6 +315,18 @@ async def login_user(user: UserLogin):
     # 建立 JWT token
     access_token = create_access_token(data={"sub": db_user['user_id']})
 
+    # 更新 last_login
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET last_login = %s WHERE user_id = %s",
+        (datetime.now(timezone.utc), db_user['user_id'])
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    # 回傳 token + 使用者資料
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -324,11 +336,8 @@ async def login_user(user: UserLogin):
             "email": db_user['email'] if db_user['email'] else "",
             "is_admin": bool(db_user['is_admin'])
         }
-        cursor.execute(
-        "UPDATE users SET last_login = %s WHERE user_id = %s",
-        (datetime.now(timezone.utc), db_user['user_id'])
-        )
     }
+
 
 @app.get("/me")
 async def get_current_user_info(current_user: str = Depends(get_current_user)):
