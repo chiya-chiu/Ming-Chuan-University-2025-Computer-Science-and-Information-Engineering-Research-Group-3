@@ -22,12 +22,12 @@ import re
 
 
 # 載入 .env 檔案
-load_dotenv()
+load_dotenv()   # 載入環境變數，像是 API 金鑰
 
 # 安全設定
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this")
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this") # JWT 加密用
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 30    #token 30 分鐘內有效
 
 # 資料庫連線設定
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -37,17 +37,20 @@ if not DATABASE_URL:
 def get_db_connection():
     """取得 PostgreSQL 資料庫連線"""
     try:
+        # 檢查是否為 Render 部署環境
         if "render.com" in DATABASE_URL or "amazonaws.com" in DATABASE_URL:
+            # 雲端環境需要 SSL 連線
             conn = psycopg2.connect(
                 DATABASE_URL,
                 cursor_factory=RealDictCursor,
                 sslmode='require'
             )
         else:
+            # 本地環境不需要 SSL 連線
             conn = psycopg2.connect(
                 DATABASE_URL,
                 cursor_factory=RealDictCursor,
-                sslmode='disable'
+                sslmode='disable'  # 本地測試時停用 SSL
             )
         return conn
     except Exception as e:
@@ -69,78 +72,67 @@ def test_db_connection():
         print(f"❌ 資料庫連線失敗: {e}")
         return False
 
-# 資料庫初始化 - 修改為學習追蹤系統
+# 資料庫初始化
 def init_database():
-    """初始化 PostgreSQL 資料庫 - 學習追蹤版本（修正欄位名）"""
+    """初始化 PostgreSQL 資料庫"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 學習者資料表 - 確保使用 user_name
+    # 使用者表 - PostgreSQL 語法
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS learners (
-            id SERIAL PRIMARY KEY,
-            user_name VARCHAR(255) UNIQUE NOT NULL,     -- 學習者姓名（統一使用user_name）
-            user_id VARCHAR(255) UNIQUE NOT NULL,       -- 學習者唯一 ID
-            password_hash VARCHAR(255) NOT NULL,        -- 密碼雜湊值
-            last_visit_time TIMESTAMP,                  -- 最後點擊學習網站的時間
-            today_visit_count INTEGER DEFAULT 0,        -- 當天點擊學習網站的次數
-            last_count_reset_date DATE,                 -- 最後重置計數的日期
-            total_questions INTEGER DEFAULT 0,          -- 總詢問問題數
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            is_active BOOLEAN DEFAULT TRUE
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,                    -- PostgreSQL 的自動遞增 ID
+            user_id VARCHAR(255) UNIQUE NOT NULL,     -- 使用者唯一 ID（UUID）
+            username VARCHAR(255) UNIQUE NOT NULL,    -- 使用者名稱（唯一）
+            email VARCHAR(255),                       -- 電子信箱（可選）
+            password_hash VARCHAR(255) NOT NULL,      -- 密碼的 SHA256 雜湊值
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 註冊時間 使用 PostgreSQL 語法
+            is_active BOOLEAN DEFAULT TRUE,           -- 是否啟用
+            is_admin BOOLEAN DEFAULT FALSE            -- 是否為管理員
         )
     ''')
 
-    # 學習問題記錄表
+    # 問答紀錄表 - PostgreSQL 語法
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS learning_questions (
-            id SERIAL PRIMARY KEY,
-            user_id VARCHAR(255) NOT NULL,              -- 學習者 ID
-            question TEXT NOT NULL,                     -- 詢問的問題內容
-            answer TEXT NOT NULL,                       -- 系統回答內容
-            sources_count INTEGER DEFAULT 0,            -- 參考來源數量
-            asked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 詢問時間
-            response_time REAL DEFAULT 0,               -- 回應時間
-            FOREIGN KEY(user_id) REFERENCES learners(user_id)
+        CREATE TABLE IF NOT EXISTS questions_log (
+            id SERIAL PRIMARY KEY,                    -- 問答紀錄編號
+            user_id VARCHAR(255) NOT NULL,            -- 使用者 ID
+            question TEXT NOT NULL,                   -- 問題內容
+            answer TEXT NOT NULL,                     -- 回答內容
+            sources_count INTEGER DEFAULT 0,          -- 來源段落數
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 問答發生時間
+            response_time REAL,                       -- 回答耗時（秒）
+            FOREIGN KEY(user_id) REFERENCES users(user_id) -- 關聯到 users 表
         )
     ''')
 
-    # 學習網站存取記錄表
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS visit_logs (
-            id SERIAL PRIMARY KEY,
-            user_id VARCHAR(255) NOT NULL,              -- 學習者 ID
-            visit_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 造訪時間
-            action_type VARCHAR(50) DEFAULT 'visit',    -- 動作類型 (visit, question, etc.)
-            FOREIGN KEY(user_id) REFERENCES learners(user_id)
-        )
-    ''')
-
-    conn.commit()
+    conn.commit()   # 儲存變更
     cursor.close()
-    conn.close()
+    conn.close()    # 關閉連線
 
 # 應用程式生命週期管理
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("🔧 初始化學習追蹤資料庫...")
-    test_db_connection()
+    # 啟動時執行
+    print("🔧 初始化資料庫...")
+    test_db_connection()  # 測試連線
     init_database()
-    print("✅ 學習追蹤資料庫初始化完成")
+    print("✅ 資料庫初始化完成")
     yield
+    # 關閉時執行（如果需要清理）
 
+#這就是後端網站的主體
 app = FastAPI(
-    title="學習追蹤 RAG 問答系統",
-    description="追蹤學習者行為的智能問答系統",
+    title="RAG 問答系統",
+    description="基於文件的智能問答系統（含帳號管理）",
     lifespan=lifespan
 )
 
-# 確保靜態檔案目錄存在
-if not os.path.exists("static"):
-    os.makedirs("static")
-
+# 掛載 /static 用來提供 CSS、JS 檔案
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+# 設定 CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -155,13 +147,13 @@ rag_instance: Optional[RAGHelper] = None
 # 安全相關
 security = HTTPBearer()
 
-# 資料模型 - 支援前端使用的 username 欄位
-class LearnerRegister(BaseModel):
-    username: str      # 前端使用 username
+# 資料模型（保持不變）
+class UserRegister(BaseModel):
+    username: str
     password: str
 
-class LearnerLogin(BaseModel):
-    username: str      # 前端使用 username
+class UserLogin(BaseModel):
+    username: str
     password: str
 
 class Token(BaseModel):
@@ -180,24 +172,22 @@ class StatusResponse(BaseModel):
     status: str
     message: str
 
-class LearnerStats(BaseModel):
-    username: str       # 前端期望 username
+class UserStats(BaseModel):
     total_questions: int
     questions_today: int
-    today_visit_count: int
-    last_visit_time: Optional[str]
     avg_response_time: float
 
-class LearningHistoryItem(BaseModel):
+class ChatHistoryItem(BaseModel):
     question: str
     answer: str
     timestamp: str
     response_time: float
 
-class LearningHistoryResponse(BaseModel):
-    history: List[LearningHistoryItem]
+class ChatHistoryResponse(BaseModel):
+    history: List[ChatHistoryItem]
     total_count: int
 
+# 新增圖片回應模型
 class ImageResponse(BaseModel):
     image_url: str
     image_name: str
@@ -213,7 +203,7 @@ def verify_password(password: str, hashed: str) -> bool:
     return hash_password(password) == hashed
 
 def create_access_token(data: dict):
-    """建立 JWT token"""
+    """建立 JWT token，token 30 分鐘後過期"""
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
@@ -237,201 +227,119 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             detail="Invalid authentication credentials"
         )
 
-def get_learner_from_db(user_id: str = None, user_name: str = None):
-    """從資料庫取得學習者資料"""
+def get_user_from_db(user_id: str = None, username: str = None):
+    """從資料庫取得使用者資料 - PostgreSQL 版本"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     if user_id:
-        cursor.execute("SELECT * FROM learners WHERE user_id = %s", (user_id,))
-    elif user_name:
-        cursor.execute("SELECT * FROM learners WHERE user_name = %s", (user_name,))
+        cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+    elif username:
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
     else:
         cursor.close()
         conn.close()
         return None
 
-    learner = cursor.fetchone()
+    user = cursor.fetchone()
     cursor.close()
     conn.close()
-    return learner
+    return user
 
-def update_visit_count(user_id: str):
-    """更新造訪計數和最後造訪時間"""
+def log_question(user_id: str, question: str, answer: str, sources_count: int, response_time: float):
+    """記錄問答到資料庫 - PostgreSQL 版本"""
     conn = get_db_connection()
     cursor = conn.cursor()
-    
-    now = datetime.now()
-    today = now.date()
-    
-    # 獲取使用者目前資料
-    cursor.execute("SELECT today_visit_count, last_count_reset_date FROM learners WHERE user_id = %s", (user_id,))
-    result = cursor.fetchone()
-    
-    if result:
-        current_count = result['today_visit_count'] or 0
-        last_reset_date = result['last_count_reset_date']
-        
-        # 如果是新的一天，重置計數
-        if not last_reset_date or last_reset_date != today:
-            new_count = 1
-            cursor.execute('''
-                UPDATE learners 
-                SET today_visit_count = %s, 
-                    last_visit_time = %s, 
-                    last_count_reset_date = %s 
-                WHERE user_id = %s
-            ''', (new_count, now, today, user_id))
-        else:
-            # 同一天，增加計數
-            new_count = current_count + 1
-            cursor.execute('''
-                UPDATE learners 
-                SET today_visit_count = %s, 
-                    last_visit_time = %s 
-                WHERE user_id = %s
-            ''', (new_count, now, user_id))
-    
-    # 記錄造訪日誌
     cursor.execute('''
-        INSERT INTO visit_logs (user_id, visit_time, action_type)
-        VALUES (%s, %s, 'visit')
-    ''', (user_id, now))
-    
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-def log_learning_question(user_id: str, question: str, answer: str, sources_count: int, response_time: float):
-    """記錄學習問題到資料庫"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    # 記錄問題
-    cursor.execute('''
-        INSERT INTO learning_questions (user_id, question, answer, sources_count, response_time)
+        INSERT INTO questions_log (user_id, question, answer, sources_count, response_time)
         VALUES (%s, %s, %s, %s, %s)
     ''', (user_id, question, answer, sources_count, response_time))
-    
-    # 更新總問題數
-    cursor.execute('''
-        UPDATE learners 
-        SET total_questions = total_questions + 1 
-        WHERE user_id = %s
-    ''', (user_id,))
-    
-    # 記錄問題動作日誌
-    cursor.execute('''
-        INSERT INTO visit_logs (user_id, action_type)
-        VALUES (%s, 'question')
-    ''', (user_id,))
-    
     conn.commit()
     cursor.close()
     conn.close()
+
+def verify_admin(user_id: str):
+    """驗證管理員權限"""
+    user = get_user_from_db(user_id=user_id)
+    if not user or not user['is_admin']:  # 使用字典方式存取
+        raise HTTPException(status_code=403, detail="您沒有管理員權限")
 
 # API 端點
 
-@app.get("/")
-async def root():
-    """根路徑回傳系統資訊"""
-    return {
-        "message": "學習追蹤 RAG 問答系統 API",
-        "version": "1.0",
-        "docs": "/docs",
-        "health": "/health"
-    }
+@app.get("/", response_class=FileResponse)
+async def serve_index():
+    """顯示首頁"""
+    return FileResponse("static/index.html")
 
 @app.post("/register")
-async def register_learner(learner: LearnerRegister):
-    """學習者註冊"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+async def register_user(user: UserRegister):
+    """使用者註冊 - PostgreSQL 版本"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-        # 檢查學習者是否已存在（使用前端傳來的 username）
-        cursor.execute("SELECT * FROM learners WHERE user_name = %s", (learner.username,))
-        if cursor.fetchone():
-            cursor.close()
-            conn.close()
-            raise HTTPException(status_code=400, detail="學習者姓名已存在")
-
-        # 建立新學習者（將 username 存到 user_name 欄位）
-        user_id = str(uuid.uuid4())
-        password_hash = hash_password(learner.password)
-
-        cursor.execute('''
-            INSERT INTO learners (user_id, user_name, password_hash, last_count_reset_date)
-            VALUES (%s, %s, %s, %s)
-        ''', (user_id, learner.username, password_hash, datetime.now().date()))
-
-        conn.commit()
+    # 檢查使用者是否已存在
+    cursor.execute("SELECT * FROM users WHERE username = %s", (user.username,))
+    if cursor.fetchone():
         cursor.close()
         conn.close()
+        raise HTTPException(status_code=400, detail="使用者名稱已存在")
 
-        return {"message": "學習者註冊成功", "user_id": user_id}
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"註冊失敗: {str(e)}")
+    # 建立新使用者
+    user_id = str(uuid.uuid4())
+    password_hash = hash_password(user.password)
+
+    cursor.execute('''
+        INSERT INTO users (user_id, username, password_hash)
+        VALUES (%s, %s, %s)
+    ''', (user_id, user.username, password_hash))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return {"message": "註冊成功", "user_id": user_id}
 
 @app.post("/login", response_model=Token)
-async def login_learner(learner: LearnerLogin):
-    """學習者登入"""
-    try:
-        # 使用前端傳來的 username 查詢資料庫的 user_name 欄位
-        db_learner = get_learner_from_db(user_name=learner.username)
+async def login_user(user: UserLogin):
+    """使用者登入 - PostgreSQL 版本"""
+    db_user = get_user_from_db(username=user.username)
 
-        if not db_learner or not verify_password(learner.password, db_learner['password_hash']):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="姓名或密碼錯誤"
-            )
+    # 比對密碼
+    if not db_user or not verify_password(user.password, db_user['password_hash']):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="帳號或密碼錯誤"
+        )
 
-        # 更新造訪記錄
-        update_visit_count(db_learner['user_id'])
+    # 建立 JWT token
+    access_token = create_access_token(data={"sub": db_user['user_id']})
 
-        # 建立 JWT token
-        access_token = create_access_token(data={"sub": db_learner['user_id']})
-
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user_info": {
-                "user_id": db_learner['user_id'],
-                "username": db_learner['user_name'],  # 回傳給前端時使用 username
-                "today_visit_count": db_learner['today_visit_count'] or 0,
-                "total_questions": db_learner['total_questions'] or 0
-            }
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_info": {
+            "user_id": db_user['user_id'],
+            "username": db_user['username'],
+            "email": db_user['email'] if db_user['email'] else "",
+            "is_admin": bool(db_user['is_admin'])
         }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"登入失敗: {str(e)}")
+    }
 
 @app.get("/me")
-async def get_current_learner_info(current_user: str = Depends(get_current_user)):
-    """取得目前登入學習者的資訊"""
-    try:
-        # 更新造訪記錄
-        update_visit_count(current_user)
-        
-        db_learner = get_learner_from_db(user_id=current_user)
-        if not db_learner:
-            raise HTTPException(status_code=404, detail="學習者不存在")
+async def get_current_user_info(current_user: str = Depends(get_current_user)):
+    """取得目前登入使用者的資訊"""
+    db_user = get_user_from_db(user_id=current_user)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="使用者不存在")
 
-        return {
-            "user_id": db_learner['user_id'],
-            "username": db_learner['user_name'],  # 回傳給前端時使用 username
-            "last_visit_time": str(db_learner['last_visit_time']) if db_learner['last_visit_time'] else None,
-            "today_visit_count": db_learner['today_visit_count'] or 0,
-            "total_questions": db_learner['total_questions'] or 0,
-            "created_at": str(db_learner['created_at']),
-            "is_active": db_learner['is_active']
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"取得使用者資訊失敗: {str(e)}")
+    return {
+        "user_id": db_user['user_id'],
+        "username": db_user['username'],
+        "email": db_user['email'] if db_user['email'] else "",
+        "created_at": str(db_user['created_at']),
+        "is_active": db_user['is_active'],
+        "is_admin": db_user['is_admin']
+    }
 
 @app.post("/initialize")
 async def initialize_system(current_user: str = Depends(get_current_user)):
@@ -451,15 +359,17 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
 
         return StatusResponse(
             status="success",
-            message="學習系統初始化完成"
+            message="RAG 系統初始化完成"
         )
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"學習系統初始化失敗：{str(e)}")
+        raise HTTPException(status_code=500, detail=f"系統初始化失敗：{str(e)}")
 
+
+# 在 ask_question 函數中新增圖片測試邏輯
 @app.post("/ask", response_model=AnswerResponse)
 async def ask_question(request: QuestionRequest, current_user: str = Depends(get_current_user)):
-    """詢問學習問題"""
+    """回答問題（需登入）"""
     global rag_instance
 
     # 檢查是否為圖片測試指令
@@ -468,9 +378,10 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
             image_id = int(request.question.strip())
             image_response = await get_test_image(image_id, current_user)
 
+            # 記錄問答
             start_time = datetime.now()
             response_time = (datetime.now() - start_time).total_seconds()
-            log_learning_question(current_user, request.question, f"顯示圖片：{image_response.image_name}", 0, response_time)
+            log_question(current_user, request.question, f"顯示圖片：{image_response.image_name}", 0, response_time)
 
             return AnswerResponse(
                 answer=f"IMAGE:{image_response.image_url}|{image_response.message}",
@@ -483,8 +394,9 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
             )
 
     if not rag_instance:
-        raise HTTPException(status_code=400, detail="學習系統尚未初始化")
+        raise HTTPException(status_code=400, detail="系統尚未初始化")
 
+    # 原有的 RAG 問答邏輯...
     try:
         start_time = datetime.now()
         answer, sources = rag_instance.ask(request.question)
@@ -500,126 +412,141 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
             }
             formatted_sources.append(source_info)
 
-        # 記錄學習問題
-        log_learning_question(current_user, request.question, answer, len(sources), response_time)
+        # 記錄問答
+        log_question(current_user, request.question, answer, len(sources), response_time)
 
         return AnswerResponse(answer=answer, sources=formatted_sources)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"回答問題時發生錯誤：{str(e)}")
 
-@app.get("/stats", response_model=LearnerStats)
-async def get_learner_stats(current_user: str = Depends(get_current_user)):
-    """取得學習者統計"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+@app.get("/stats", response_model=UserStats)
+async def get_user_stats(current_user: str = Depends(get_current_user)):
+    """取得使用者問答統計 - PostgreSQL 版本"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-        # 獲取學習者基本資料
-        cursor.execute('''
-            SELECT user_name, today_visit_count, last_visit_time, total_questions
-            FROM learners WHERE user_id = %s
-        ''', (current_user,))
-        learner_data = cursor.fetchone()
+    # 總問題數
+    cursor.execute("SELECT COUNT(*) FROM questions_log WHERE user_id = %s", (current_user,))
+    total_questions = cursor.fetchone()['count']
 
-        # 今日問題數
-        cursor.execute('''
-            SELECT COUNT(*) as count
-            FROM learning_questions
-            WHERE user_id = %s AND DATE(asked_at) = CURRENT_DATE
-        ''', (current_user,))
-        questions_today = cursor.fetchone()['count']
+    # 今日問題數 - 使用 PostgreSQL 語法
+    cursor.execute('''
+        SELECT COUNT(*)
+        FROM questions_log
+        WHERE user_id = %s AND DATE(created_at) = CURRENT_DATE
+    ''', (current_user,))
+    questions_today = cursor.fetchone()['count']
 
-        # 平均回應時間
-        cursor.execute('''
-            SELECT AVG(response_time) as avg
-            FROM learning_questions WHERE user_id = %s
-        ''', (current_user,))
-        result = cursor.fetchone()
-        avg_response_time = float(result['avg']) if result['avg'] else 0.0
+    # 平均回應時間
+    cursor.execute("SELECT AVG(response_time) FROM questions_log WHERE user_id = %s", (current_user,))
+    result = cursor.fetchone()
+    avg_response_time = float(result['avg']) if result['avg'] else 0.0
 
-        cursor.close()
-        conn.close()
+    cursor.close()
+    conn.close()
 
-        return LearnerStats(
-            username=learner_data['user_name'],  # 回傳 username
-            total_questions=learner_data['total_questions'] or 0,
-            questions_today=questions_today,
-            today_visit_count=learner_data['today_visit_count'] or 0,
-            last_visit_time=str(learner_data['last_visit_time']) if learner_data['last_visit_time'] else None,
-            avg_response_time=round(avg_response_time, 2)
-        )
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"取得統計資料失敗: {str(e)}")
+    return UserStats(
+        total_questions=total_questions,
+        questions_today=questions_today,
+        avg_response_time=round(avg_response_time, 2)
+    )
 
-@app.get("/learning/history", response_model=LearningHistoryResponse)
-async def get_learning_history(
+@app.get("/admin/stats")
+async def get_admin_stats(current_user: str = Depends(get_current_user)):
+    """管理員統計 - PostgreSQL 版本"""
+    verify_admin(current_user)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM users")
+    total_users = cursor.fetchone()['count']
+
+    cursor.execute("SELECT COUNT(*) FROM questions_log")
+    total_questions = cursor.fetchone()['count']
+
+    cursor.execute('''
+        SELECT COUNT(*)
+        FROM questions_log
+        WHERE DATE(created_at) = CURRENT_DATE
+    ''')
+    questions_today = cursor.fetchone()['count']
+
+    cursor.close()
+    conn.close()
+
+    return {
+        "total_users": total_users,
+        "total_questions": total_questions,
+        "questions_today": questions_today
+    }
+
+@app.get("/status")
+async def get_status():
+    """取得系統狀態"""
+    global rag_instance
+    return StatusResponse(
+        status="ready" if rag_instance else "not_initialized",
+        message="系統已就緒" if rag_instance else "系統尚未初始化"
+    )
+
+@app.get("/chat/history", response_model=ChatHistoryResponse)
+async def get_chat_history(
         limit: int = 50,
         offset: int = 0,
         current_user: str = Depends(get_current_user)
 ):
-    """獲取學習歷史紀錄"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    """獲取使用者的聊天歷史紀錄 - PostgreSQL 版本"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-        # 獲取總筆數
-        cursor.execute("SELECT COUNT(*) as count FROM learning_questions WHERE user_id = %s", (current_user,))
-        total_count = cursor.fetchone()['count']
+    # 獲取總筆數
+    cursor.execute("SELECT COUNT(*) FROM questions_log WHERE user_id = %s", (current_user,))
+    total_count = cursor.fetchone()['count']
 
-        # 獲取學習歷史紀錄
-        cursor.execute('''
-            SELECT question, answer, asked_at, response_time
-            FROM learning_questions
-            WHERE user_id = %s
-            ORDER BY asked_at DESC
-            LIMIT %s OFFSET %s
-        ''', (current_user, limit, offset))
+    # 獲取歷史紀錄 - 使用 PostgreSQL 的 LIMIT/OFFSET 語法
+    cursor.execute('''
+        SELECT question, answer, created_at, response_time
+        FROM questions_log
+        WHERE user_id = %s
+        ORDER BY created_at DESC
+        LIMIT %s OFFSET %s
+    ''', (current_user, limit, offset))
 
-        records = cursor.fetchall()
-        cursor.close()
-        conn.close()
+    records = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
-        # 格式化歷史紀錄
-        history = []
-        for record in records:
-            history.append(LearningHistoryItem(
-                question=record['question'],
-                answer=record['answer'],
-                timestamp=str(record['asked_at']),
-                response_time=record['response_time']
-            ))
+    # 格式化歷史紀錄
+    history = []
+    for record in records:
+        history.append(ChatHistoryItem(
+            question=record['question'],
+            answer=record['answer'],
+            timestamp=str(record['created_at']),
+            response_time=record['response_time']
+        ))
 
-        return LearningHistoryResponse(
-            history=history,
-            total_count=total_count
-        )
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"取得學習歷史失敗: {str(e)}")
+    return ChatHistoryResponse(
+        history=history,
+        total_count=total_count
+    )
 
-@app.delete("/learning/history")
-async def clear_learning_history(current_user: str = Depends(get_current_user)):
-    """清除學習歷史紀錄"""
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+@app.delete("/chat/history")
+async def clear_chat_history(current_user: str = Depends(get_current_user)):
+    """清除使用者的聊天歷史紀錄 - PostgreSQL 版本"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM learning_questions WHERE user_id = %s", (current_user,))
-        deleted_count = cursor.rowcount
+    cursor.execute("DELETE FROM questions_log WHERE user_id = %s", (current_user,))
+    deleted_count = cursor.rowcount
 
-        # 重置問題計數
-        cursor.execute("UPDATE learners SET total_questions = 0 WHERE user_id = %s", (current_user,))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        return {"message": f"已清除 {deleted_count} 筆學習紀錄"}
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"清除學習歷史失敗: {str(e)}")
+    return {"message": f"已清除 {deleted_count} 筆歷史紀錄"}
 
 def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower()
@@ -628,16 +555,20 @@ def natural_sort_key(s):
 @app.get("/test/image/{image_id}")
 async def get_test_image(image_id: int, current_user: str = Depends(get_current_user)):
     """測試圖片顯示功能"""
+
+    # 檢查 images 資料夾是否存在
     images_folder = "./static/images"
     if not os.path.exists(images_folder):
         raise HTTPException(status_code=404, detail="圖片資料夾不存在")
 
+    # 獲取資料夾中的所有圖片檔案
     image_extensions = ['*.jpg', '*.jpeg', '*.png', '*.gif', '*.bmp', '*.webp']
-    image_files = set()
+    image_files =set()
     for ext in image_extensions:
         image_files.update(glob.glob(os.path.join(images_folder, ext)))
         image_files.update(glob.glob(os.path.join(images_folder, ext.upper())))
 
+    # 按檔名排序
     image_files = sorted(list(image_files), key=natural_sort_key)
 
     if not image_files:
@@ -654,6 +585,7 @@ async def get_test_image(image_id: int, current_user: str = Depends(get_current_
         image_name=image_name,
         message=f"顯示第 {image_id} 張圖片：{image_name}"
     )
+
 
 @app.get("/test/image-list")
 async def get_image_list(current_user: str = Depends(get_current_user)):
@@ -677,20 +609,12 @@ async def get_image_list(current_user: str = Depends(get_current_user)):
         "message": f"找到 {len(image_names)} 張圖片"
     }
 
-@app.get("/status")
-async def get_status():
-    """取得系統狀態"""
-    global rag_instance
-    return StatusResponse(
-        status="ready" if rag_instance else "not_initialized",
-        message="學習系統已就緒" if rag_instance else "學習系統尚未初始化"
-    )
-
-# 健康檢查端點
+# 新增健康檢查端點（防休眠用）
 @app.get("/health")
 async def health_check():
     """健康檢查端點"""
     try:
+        # 測試資料庫連線
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT 1")
@@ -701,7 +625,7 @@ async def health_check():
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
             "database": "connected",
-            "learning_system": "ready" if rag_instance else "not_initialized"
+            "rag_system": "ready" if rag_instance else "not_initialized"
         }
     except Exception as e:
         return {
@@ -711,57 +635,145 @@ async def health_check():
             "error": str(e)
         }
 
-# 管理員端點 - 查看所有學習者狀態
-@app.get("/admin/learners")
-async def get_all_learners():
-    """取得所有學習者狀態（管理員用）"""
+@app.get("/debug/database")
+async def debug_database():
+    """調試資料庫連線狀態"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute('''
-            SELECT user_name, user_id, last_visit_time, today_visit_count, 
-                   total_questions, created_at, is_active
-            FROM learners 
-            ORDER BY last_visit_time DESC NULLS LAST
-        ''')
+        # 測試基本連線
+        cursor.execute("SELECT version();")
+        version = cursor.fetchone()
         
-        learners = cursor.fetchall()
+        # 檢查表格是否存在
+        cursor.execute("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public'
+        """)
+        tables = cursor.fetchall()
+        
         cursor.close()
         conn.close()
         
         return {
-            "learners": [dict(learner) for learner in learners],
-            "total_count": len(learners)
+            "status": "success",
+            "database_version": version['version'],
+            "tables": [table['table_name'] for table in tables],
+            "connection": "OK"
         }
-    
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"取得學習者清單失敗: {str(e)}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "connection": "FAILED"
+        }
 
-# 添加除錯端點
-@app.get("/debug/fix-schema")
-async def fix_database_schema():
-    """修復資料庫表格結構 - 統一欄位名為user_name"""
+@app.get("/debug/users-table")
+async def debug_users_table():
+    """調試 users 表格狀態"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        operations_performed = []
-        
-        # 檢查learners表格是否存在
+        # 檢查 users 表格是否存在
         cursor.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
-                WHERE table_name = 'learners'
+                WHERE table_schema = 'public' 
+                AND table_name = 'users'
             );
         """)
-        table_exists = cursor.fetchone()[0]
+        table_exists = cursor.fetchone()['exists']
         
         if not table_exists:
-            # 如果表格不存在，建立正確的表格
-            init_database()
-            operations_performed.append("建立了learners表格")
-        else:
-            # 檢查欄位
-            cursor.execute("""
-                
+            cursor.close()
+            conn.close()
+            return {
+                "status": "error",
+                "message": "users 表格不存在",
+                "table_exists": False
+            }
+        
+        # 獲取表格結構
+        cursor.execute("""
+            SELECT column_name, data_type, is_nullable 
+            FROM information_schema.columns 
+            WHERE table_name = 'users'
+            ORDER BY ordinal_position;
+        """)
+        columns = cursor.fetchall()
+        
+        # 獲取使用者數量
+        cursor.execute("SELECT COUNT(*) as count FROM users")
+        user_count = cursor.fetchone()['count']
+        
+        # 獲取前 5 個使用者（不包含敏感資訊）
+        cursor.execute("""
+            SELECT user_id, username, email, created_at, is_active, is_admin 
+            FROM users 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        """)
+        sample_users = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "status": "success",
+            "table_exists": True,
+            "user_count": user_count,
+            "columns": [
+                {
+                    "name": col['column_name'],
+                    "type": col['data_type'],
+                    "nullable": col['is_nullable']
+                } for col in columns
+            ],
+            "sample_users": [dict(user) for user in sample_users]
+        }
+        
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "message": "無法查詢 users 表格"
+        }
+
+@app.get("/debug/init-check")
+async def debug_init_check():
+    """檢查初始化狀態和環境變數"""
+    return {
+        "database_url_set": bool(os.getenv("DATABASE_URL")),
+        "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
+        "secret_key_set": bool(os.getenv("SECRET_KEY")),
+        "rag_initialized": rag_instance is not None,
+        "pdf_folder_exists": os.path.exists("./pdfFiles")
+    }
+
+@app.post("/debug/force-init-db")
+async def force_init_database():
+    """強制重新初始化資料庫（僅供調試使用）"""
+    try:
+        init_database()
+        return {
+            "status": "success",
+            "message": "資料庫重新初始化完成"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"資料庫初始化失敗：{str(e)}"
+        }
+
+if __name__ == "__main__":
+    import uvicorn
+
+    print("🚀 啟動 RAG 網站服務（PostgreSQL 版本）...")
+    print("📱 網站網址：http://localhost:8080")
+    print("📚 API 文件：http://localhost:8080/docs")
+    print("📁 請確保 pdfFiles 資料夾中有要處理的檔案")
+    print("🔑 請在 .env 檔案中設定 SECRET_KEY、OPENAI_API_KEY 和 DATABASE_URL")
+    uvicorn.run(app, host="0.0.0.0", port=8080)
