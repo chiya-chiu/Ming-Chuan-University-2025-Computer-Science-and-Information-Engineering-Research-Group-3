@@ -87,6 +87,7 @@ def init_database():
             email VARCHAR(255),                       -- 電子信箱（可選）
             password_hash VARCHAR(255) NOT NULL,      -- 密碼的 SHA256 雜湊值
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 註冊時間 使用 PostgreSQL 語法
+            last_login TIMESTAMP,                     -- 最後登入時間
             is_active BOOLEAN DEFAULT TRUE,           -- 是否啟用
             is_admin BOOLEAN DEFAULT FALSE            -- 是否為管理員
         )
@@ -323,6 +324,10 @@ async def login_user(user: UserLogin):
             "email": db_user['email'] if db_user['email'] else "",
             "is_admin": bool(db_user['is_admin'])
         }
+        cursor.execute(
+        "UPDATE users SET last_login = %s WHERE user_id = %s",
+        (datetime.now(timezone.utc), db_user['user_id'])
+        )
     }
 
 @app.get("/me")
@@ -333,13 +338,14 @@ async def get_current_user_info(current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="使用者不存在")
 
     return {
-        "user_id": db_user['user_id'],
-        "username": db_user['username'],
-        "email": db_user['email'] if db_user['email'] else "",
-        "created_at": str(db_user['created_at']),
-        "is_active": db_user['is_active'],
-        "is_admin": db_user['is_admin']
-    }
+    "user_id": db_user['user_id'],
+    "username": db_user['username'],
+    "email": db_user['email'] if db_user['email'] else "",
+    "created_at": str(db_user['created_at']),
+    "last_login": str(db_user['last_login']) if db_user['last_login'] else None,
+    "is_active": db_user['is_active'],
+    "is_admin": db_user['is_admin']
+}
 
 @app.post("/initialize")
 async def initialize_system(current_user: str = Depends(get_current_user)):
