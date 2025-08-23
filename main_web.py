@@ -364,7 +364,23 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"系統初始化失敗：{str(e)}")
-
+@app.get("/debug/questions-log")
+async def debug_questions_log():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, user_id, question, created_at, response_time
+            FROM questions_log
+            ORDER BY created_at DESC
+            LIMIT 20
+        """)
+        records = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return {"status": "success", "records": records}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 # 在 ask_question 函數中新增圖片測試邏輯
 @app.post("/ask", response_model=AnswerResponse)
