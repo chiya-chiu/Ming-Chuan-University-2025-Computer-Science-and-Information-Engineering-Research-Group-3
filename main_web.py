@@ -1,3 +1,4 @@
+你說：
 import os
 import asyncio
 import hashlib
@@ -80,19 +81,17 @@ def init_database():
 
     # 使用者表 - PostgreSQL 語法
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        user_id VARCHAR(255) UNIQUE NOT NULL,
-        username VARCHAR(255) UNIQUE NOT NULL,
-        email VARCHAR(255),
-        password_hash VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        last_login TIMESTAMP,
-        last_click TIMESTAMP,   
-        is_active BOOLEAN DEFAULT TRUE,
-        is_admin BOOLEAN DEFAULT FALSE
-    )
-''')
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,                    -- PostgreSQL 的自動遞增 ID
+            user_id VARCHAR(255) UNIQUE NOT NULL,     -- 使用者唯一 ID（UUID）
+            username VARCHAR(255) UNIQUE NOT NULL,    -- 使用者名稱（唯一）
+            email VARCHAR(255),                       -- 電子信箱（可選）
+            password_hash VARCHAR(255) NOT NULL,      -- 密碼的 SHA256 雜湊值
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 註冊時間 使用 PostgreSQL 語法
+            is_active BOOLEAN DEFAULT TRUE,           -- 是否啟用
+            is_admin BOOLEAN DEFAULT FALSE            -- 是否為管理員
+        )
+    ''')
 
     # 問答紀錄表 - PostgreSQL 語法
     cursor.execute('''
@@ -316,18 +315,6 @@ async def login_user(user: UserLogin):
     # 建立 JWT token
     access_token = create_access_token(data={"sub": db_user['user_id']})
 
-    # 更新 last_login
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE users SET last_login = %s WHERE user_id = %s",
-        (datetime.now(timezone.utc), db_user['user_id'])
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-    # 回傳 token + 使用者資料
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -338,21 +325,10 @@ async def login_user(user: UserLogin):
             "is_admin": bool(db_user['is_admin'])
         }
     }
-def update_last_click(user_id: str):
-    """更新使用者最後點擊網站時間"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE users SET last_click = %s WHERE user_id = %s",
-        (datetime.now(timezone.utc), user_id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
 
 @app.get("/me")
 async def get_current_user_info(current_user: str = Depends(get_current_user)):
-    update_last_click(current_user)  # 👈 加這行
+    """取得目前登入使用者的資訊"""
     db_user = get_user_from_db(user_id=current_user)
     if not db_user:
         raise HTTPException(status_code=404, detail="使用者不存在")
@@ -362,8 +338,6 @@ async def get_current_user_info(current_user: str = Depends(get_current_user)):
         "username": db_user['username'],
         "email": db_user['email'] if db_user['email'] else "",
         "created_at": str(db_user['created_at']),
-        "last_login": str(db_user['last_login']) if db_user['last_login'] else None,
-        "last_click": str(db_user['last_click']) if db_user['last_click'] else None,
         "is_active": db_user['is_active'],
         "is_admin": db_user['is_admin']
     }
@@ -391,23 +365,7 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"系統初始化失敗：{str(e)}")
-@app.get("/debug/questions-log")
-async def debug_questions_log():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT id, user_id, question, created_at, response_time
-            FROM questions_log
-            ORDER BY created_at DESC
-            LIMIT 20
-        """)
-        records = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return {"status": "success", "records": records}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+
 
 # 在 ask_question 函數中新增圖片測試邏輯
 @app.post("/ask", response_model=AnswerResponse)
@@ -784,7 +742,26 @@ async def debug_users_table():
             "error": str(e),
             "message": "無法查詢 users 表格"
         }
-
+    
+@app.get("/debug/questions-log")
+async def debug_questions_log():
+     """問答紀錄"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, user_id, question, created_at, response_time
+            FROM questions_log
+            ORDER BY created_at DESC
+            LIMIT 20
+        """)
+        records = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return {"status": "success", "records": records}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+        
 @app.get("/debug/init-check")
 async def debug_init_check():
     """檢查初始化狀態和環境變數"""
