@@ -744,7 +744,7 @@ async def debug_users_table():
     
 @app.get("/debug/questions-log")
 async def debug_questions_log():
-     """問答紀錄"""
+    """問答紀錄"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
