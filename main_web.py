@@ -764,7 +764,4 @@ async def fix_database_schema():
         else:
             # 檢查欄位
             cursor.execute("""
-                SELECT column_name 
-                FROM information_schema.columns 
-                WHERE table_name = 'learners' AND column_name IN ('username', 'user_name')
-            """)
+                
