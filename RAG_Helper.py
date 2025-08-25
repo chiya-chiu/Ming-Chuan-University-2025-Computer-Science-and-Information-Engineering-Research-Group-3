@@ -350,10 +350,9 @@ class RAGHelper:
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
         self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
         self.chain_setup = True
-```
+
 
 ### 2. 強化的初始化端點
-```python
 @app.post("/initialize")
 async def initialize_system(current_user: str = Depends(get_current_user)):
     """初始化 RAG 系統"""
@@ -425,10 +424,7 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
         # 清理失敗的實例
         rag_instance = None
         raise HTTPException(status_code=500, detail=f"系統初始化失敗：{str(e)}")
-```
 
-### 3. 新增診斷端點
-```python
 @app.get("/debug/rag-status")
 async def debug_rag_status(current_user: str = Depends(get_current_user)):
     """診斷 RAG 系統狀態"""
