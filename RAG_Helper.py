@@ -21,6 +21,13 @@ from langchain_community.document_loaders import (
 
 from Split_Helper import SplitHelper
 
+async def init_rag():
+    rag = RAGHelper(pdf_folder="path/to/your/pdfs")
+    await rag.load_and_prepare(file_extensions=[".pdf", ".txt"])
+    rag.setup_retrieval_chain()
+    return rag
+
+rag = asyncio.run(init_rag())
 
 class RAGHelper:
     def __init__(self, pdf_folder, chunk_size=300, chunk_overlap=50,pdf_target_len=500, pdf_tolerance=100):    #__init__ 是 python 的建構子
