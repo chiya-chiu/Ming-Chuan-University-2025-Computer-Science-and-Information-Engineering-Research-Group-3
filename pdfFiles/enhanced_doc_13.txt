@@ -1,0 +1,69 @@
+計算機簡介  01 
+ 
+ 
+⬛ 西元 2007年 
+                 Apple  電腦推出 iPhone ，讓手機與電腦間的結合， 又跨進了一大步。 這是繼西元    
+          2001 年 Apple  推出 iPod 後 ( 幾年間就賣了上億台  )，另一件「轟動武林」的佳作。 
+          Microsoft  推出作業系統 Vista ，Google  主導推出行動電話平台  Android 。 
+⬛ 西元 2008年 
+                   各路英雄逐鹿數位戰場，Microsoft  向 Yahoo!  提出購併合作案，   
+          以對抗日益強大的  Google ，惟最後破局。Google  進軍行動電話市場， 
+          推出 GPhone  ( 圖 1-21 )，和 Apple  的 iPhone  互別苗頭。 
+ 
+ 
+ 
+⬛ 西元 2009年 
+                   Microsoft 推出作業系統 Windows 7。2009 年第四季的個人電腦 (PC) 前五大廠商依序為 HP、  
+           Acer ( 宏碁 )、Dell、Lenovo 和 Toshiba。科幻電影《阿凡達》(Avatar) 使用了多台伺服器及大量記憶 
+           體來產生另令人驚嘆的立體視覺效果。光纖通訊之父高錕獲頒諾貝爾物理學獎。 
+⬛ 西元 2010年 
+                   微網誌 (microblogging) 盛行，台灣兩大微網誌平台為 Plurk ( 噗 浪 ) 與 Twitter ( 推 特 ) ( 圖1-23、  
+            1-24 )。2010 年 3 月，Alexa 統計的全球十大網站依序為 google.com、facebook.com、youtube.com 、
+yahoo.com、live.com、wikipedia.org、blogger.com、baidu.com、msn.com 和 qq.com。由《數位時代》雜
+誌統計的台灣十大網站 依序為無名小站、facebook、Yahoo! 奇摩、Youtube、PChome Online、
+Windows Live、露天拍賣、巴哈姆特電玩資訊站、聯合新聞網和 Google。 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                   透過網路計算、儲存及服務的雲端運算成為熱門技術名詞， 台大推出「雲端計算趨勢學程」。   
+           雲端計算技術的 日漸成熟、也應驗了人工智慧大師 John McCarthy 在 1960 年代所言「有朝一日，計  
+           算可能被組織成一種公用事業」(Computation may someday be organized as a public utility. )。現在除了  
+           自來水、自來瓦斯外，還有自來網路、自來計算等。 
+                  Apple 推出觸控式平板電腦 iPad，「 手機電腦化 、電腦手機化」已成必然走向。 
+⬛ 西元 2011年 
+                   超輕薄筆電 (UItrabook) 問世，其特色為體積較薄、重量較輕，且擁有較佳的電池續航力。包括 
+            宏碁的 Acer Aspire 及 Asus Zenbook 。Apple 推出平板電腦 iPad 2 及 MacBook Air。平板電腦與筆記型   
+            電腦的市場競爭更加白熱化。相較於往年個人電腦的「IBM 相容 」與 「IBM 不相容 」分類，「蘋 
+            果系列」與「非蘋陣營」也成為區隔市場的重要指標。 
+ 
+ 
+圖 1-23 微網誌的代表性網站「推 特」 
+ 
+圖 1-24 在台灣頗受歡迎的「噗 浪」 
+ 
+圖 1-21 Google  所推出的 GPhone
+
+--- 本頁圖表說明 ---
+
+figure 1.21：)，和 Apple 的 iPhone 互別苗頭。
+詳細描述：這是一個圖表，展示了)，和 Apple 的 iPhone 互別苗頭。。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。
+
+figure 1.21：Google 所推出的 GPhone
+詳細描述：這是一個圖表，展示了Google 所推出的 GPhone。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。
+
+figure 1.23：微網誌的代
+詳細描述：這是一個圖表，展示了微網誌的代。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。
+
+figure 1.24：在台灣頗受歡迎的「噗 浪」
+詳細描述：這是一個圖表，展示了在台灣頗受歡迎的「噗 浪」。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。

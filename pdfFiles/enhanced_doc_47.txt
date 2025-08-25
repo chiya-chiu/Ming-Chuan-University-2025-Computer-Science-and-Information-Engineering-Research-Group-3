@@ -1,0 +1,14 @@
+3.3 Storing Text
+ASCII(American Standard Code for Information Interchange)
+7bits
+128 Symbols
+Unicode
+32bits
+4294967296 Symbols
+3.5 Storing images
+圖像使⽤兩種不同的技術存儲在計算機中：光柵圖形(raster graphics) 和⽮量圖形(vector
+graphics) 。
+紅、綠、藍三基⾊（通常稱為  RGB）
+本⾊ (True-Color)
+⽤於編碼像素的技術之⼀稱為真彩⾊，它使⽤  24 位元來編碼⼀個像素。
+數字只有 0~255

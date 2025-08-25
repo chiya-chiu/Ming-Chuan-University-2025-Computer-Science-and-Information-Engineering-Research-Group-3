@@ -257,7 +257,7 @@ def is_chart_relevant(chart_info, source_content):
     caption = chart_info.get('original_caption', '').lower()
 
     description_keywords = [word for word in description.split() if len(word) > 3][:10]
-    caption_keywords = [word for word in caption.split() if len(word) > 5]
+    caption_keywords = [word for word in caption.split() if len(word) >= 5]
 
     return (any(keyword in source_content for keyword in description_keywords) or
             any(keyword in source_content for keyword in caption_keywords))

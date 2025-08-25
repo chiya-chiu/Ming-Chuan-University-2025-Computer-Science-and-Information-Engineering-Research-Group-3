@@ -1,0 +1,17 @@
+5.7 Differnt Architetures
+ CISC
+ RISC
+ Pipelining
+5.7.4 Parallel processing
+CPU 核⼼分⼯
+SISD( ⼀對⼀ )
+SIMD( ⼀對多 )
+MISD( 多對⼀ )
+MIMD( 多對多 )
+start
+Issue I/O
+command
+ready
+Wait
+finished
+end

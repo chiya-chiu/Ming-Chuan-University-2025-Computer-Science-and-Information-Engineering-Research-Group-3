@@ -1,0 +1,35 @@
+ex:(99) XOR[(33) AND[NOT(00) ]]=(AA)
+ NOT(00) : 00000000–->11111111=(FF)
+NOT Binary
+(00) 00000000
+輸出 11111111
+ (FF)AND(33)–->00110011=(33)
+AND Binary
+(FF) 11111111
+(33) 00110011
+輸出 00110011
+ (99)XOR(33)–->10101010=(AA)
+XOR Binary
+(99) 10011001
+(33) 00110011
+輸出 10101010
+Chapter 5.
+5.1 Introduction
+a computer
+the central processing unit
+the main memory
+the input/output subsystem
+5.2.1 The Central ProcessingUnit and The ArithmeticLogicUnit
+ 中 央 處 理 單 元 算 術 邏 輯 單 元
+Logic operation(邏輯運算) : 計算邏輯運算。例如 :NOT、OR、AND和XOR。
+Shift operation (位移運算) : 包括邏輯移位運算和算術移位運算。
+Arithmetic operation (算術運算) : 整數和實數的計算技巧（標準化） (Standardization)。
+16 16 16 16
+16 16
+16
+16 16 16
+16
+16
+16 16 16
+16
+16

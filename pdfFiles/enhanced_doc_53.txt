@@ -1,0 +1,29 @@
+5.4 Input/Output(I/O) Subsystem
+5.4.1 Nonstorage devices
+keyboard
+monitor
+printer
+5.4.2 Storage devices
+magnetic storage devices
+magnetic disks
+magnetic tape
+optical storage devices
+CD-ROMs
+CD-R
+R=recordable
+CD-RW
+RW=rewritable
+DVD
+5.5 Subsystem Interconnection
+5.5.1 Connecting CPU and memory
+ Data dus
+ Address bus
+ Control bus
+5.5.2 Connecting I/O devices
+ Controllers
+ FireWire
+ Universal Serial Bus(USB)
+ High-Dsfinition Multimedia Interface(HDMI)
+5.5.3 Addressing I/O devices
+Isolated I/O
+Memory-mapped I/O

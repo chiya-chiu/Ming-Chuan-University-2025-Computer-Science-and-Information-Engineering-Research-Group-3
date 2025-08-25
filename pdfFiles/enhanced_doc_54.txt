@@ -1,0 +1,13 @@
+5.6 Progam Execution
+5.6.1 Machine cycle
+ fetch: 取出
+ decode: 解析 / 碼
+ execute: 執⾏
+5.6.2 I/O operation
+programmed I/O
+在 ready 階段執⾏ busy waiting–-> 不斷詢問 ( 主動 )
+start
+instructions Fetch Decode Execute
+end
+yes
+no
