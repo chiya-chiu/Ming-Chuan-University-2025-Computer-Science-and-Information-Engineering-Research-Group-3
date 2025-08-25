@@ -19,7 +19,8 @@ import uuid
 from contextlib import asynccontextmanager
 import glob
 import re
-
+import json
+from pathlib import Path
 
 # 載入 .env 檔案
 load_dotenv()   # 載入環境變數，像是 API 金鑰
@@ -253,7 +254,7 @@ def log_question(user_id: str, question: str, answer: str, sources_count: int, r
     cursor.execute('''
         INSERT INTO questions_log (user_id, question, answer, sources_count, response_time)
         VALUES (%s, %s, %s, %s, %s)
-    ''', (user_id, question, answer, sources_count, response_time))
+    ''', (user_id, question, answer, sources_count, response_time))  # 儲存完整的 answer，包含 CHARTS: 資訊
     conn.commit()
     cursor.close()
     conn.close()
@@ -263,6 +264,19 @@ def verify_admin(user_id: str):
     user = get_user_from_db(user_id=user_id)
     if not user or not user['is_admin']:  # 使用字典方式存取
         raise HTTPException(status_code=403, detail="您沒有管理員權限")
+
+def is_chart_relevant(chart_info, source_content):
+    description = chart_info.get('generated_description', '').lower()
+    caption = chart_info.get('original_caption', '').lower()
+
+    # 使用更精確的關鍵字匹配
+    description_keywords = [word for word in description.split() if len(word) > 3][:10]
+    caption_keywords = [word for word in caption.split() if len(word) > 5]
+
+    return (any(keyword in source_content for keyword in description_keywords) or
+            any(keyword in source_content for keyword in caption_keywords))
+
+
 
 # API 端點
 
@@ -372,6 +386,7 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
     """回答問題（需登入）"""
     global rag_instance
 
+    """
     # 檢查是否為圖片測試指令
     if re.match(r'^\d+$', request.question.strip()):
         try:
@@ -392,6 +407,7 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
                 answer=f"❌ {e.detail}",
                 sources=[]
             )
+    """
 
     if not rag_instance:
         raise HTTPException(status_code=400, detail="系統尚未初始化")
@@ -401,6 +417,48 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
         start_time = datetime.now()
         answer, sources = rag_instance.ask(request.question)
         response_time = (datetime.now() - start_time).total_seconds()
+
+        # 檢查是否有圖表內容並載入圖表資訊
+        chart_images = []
+        chart_info_file = Path("pdfFiles/chart_metadata.json")  # 調整為你的 JSON 檔案路徑
+
+        if chart_info_file.exists():
+            try:
+                with open(chart_info_file, 'r', encoding='utf-8') as f:
+                    chart_data = json.load(f)
+
+                # 檢查 Top 5 sources 中是否有包含 generated_description 的內容
+                for doc in sources[:5]:  # 只檢查前5個
+                    source_content = doc.page_content.lower()
+
+                    # 遍歷所有圖表，檢查是否與檢索內容相關
+                    for chart_id, chart_info in chart_data.items():
+                        if 'generated_description' in chart_info:
+                            # 檢查是否相關
+                            if is_chart_relevant(chart_info, source_content):
+                                # 構建圖片路徑
+                                image_path = f"static/charts/{chart_id}.jpg"
+
+                                # 只有圖片存在才加入
+                                if os.path.exists(image_path):
+                                    chart_images.append({
+                                        'chart_id': chart_id,
+                                        'image_url': f"/static/charts/{chart_id}.jpg",
+                                        'caption': chart_info.get('original_caption', ''),
+                                        'description': chart_info.get('generated_description', ''),
+                                        'chart_type': chart_info.get('chart_type', ''),
+                                        'chart_number': chart_info.get('chart_number', '')
+                                    })
+
+                                    # 找到一個有效的圖片就跳出
+                                    if len(chart_images) >= 1:
+                                        break
+
+                    if len(chart_images) >= 1:
+                        break
+
+            except Exception as e:
+                print(f"載入圖表資訊時發生錯誤：{e}")
 
         # 格式化來源資訊
         formatted_sources = []
@@ -412,10 +470,21 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
             }
             formatted_sources.append(source_info)
 
-        # 記錄問答
-        log_question(current_user, request.question, answer, len(sources), response_time)
+        # 如果有相關圖表，將圖片資訊加入回應
+        final_answer = answer
 
-        return AnswerResponse(answer=answer, sources=formatted_sources)
+        if chart_images:
+            chart_info_text = "\n\n相關圖表：\n"
+            """
+            for i, chart in enumerate(chart_images, 1):
+                chart_info_text += f"{i}. {chart['caption']} (圖 {chart['chart_number']})\n"
+             """
+            final_answer = answer + chart_info_text + f"\nCHARTS:{json.dumps(chart_images, ensure_ascii=False)}"
+
+        # 記錄問答
+        log_question(current_user, request.question, final_answer, len(sources), response_time)
+
+        return AnswerResponse(answer=final_answer, sources=formatted_sources)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"回答問題時發生錯誤：{str(e)}")

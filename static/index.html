@@ -123,6 +123,16 @@
                 </div>
             </div>
         </div>
+
+        <!-- 中添加圖片模態框 -->
+        <div id="imageModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeImageModal()">&times;</span>
+                <img id="modalImage" class="modal-image">
+                <div id="imageCaption" class="image-caption"></div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -421,7 +431,6 @@
             }
         }
 
-        // 修改 addMessage 函數，支援時間戳記
         function addMessage(content, sender, sources = null, timestamp = null) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
@@ -434,9 +443,51 @@
                 timeHtml = `<div class="message-time">${date.toLocaleString('zh-TW')}</div>`;
             }
             
-            // 檢查是否為圖片回應
+            // 檢查是否包含圖表資訊
             let contentHtml = '';
-            if (sender === 'bot' && content.startsWith('IMAGE:')) {
+            let chartsHtml = '';
+            
+            if (sender === 'bot' && content.includes('CHARTS:')) {
+                // 分離文字內容和圖表資訊
+                const parts = content.split('CHARTS:');
+                const textContent = parts[0];
+                
+                try {
+                    const chartData = JSON.parse(parts[1]);
+                    
+                    // 處理文字內容
+                    contentHtml = renderMarkdownWithMath(textContent);
+                    
+                    // 生成圖表 HTML
+                    if (chartData && chartData.length > 0) {
+                        chartsHtml = '<div class="chart-container">';
+                        chartData.forEach((chart, index) => {
+                            chartsHtml += `
+                                <div class="chart-item" style="margin: 10px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+                                    <h4 style="margin: 0 0 10px 0; color: #333;">
+                                        ${chart.chart_number ? `圖 ${chart.chart_number}: ` : ''}${chart.caption}
+                                    </h4>
+                                    <img src="${chart.image_url}" 
+                                        alt="${chart.caption}" 
+                                        class="response-image chart-image" 
+                                        style="max-width: 100%; height: auto; cursor: pointer; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                                       onclick="openImageModal('${chart.image_url}', '圖${chart.chart_number}')">
+                                    <p style="margin: 10px 0 0 0; font-size: 14px; color: #666; font-style: italic;">
+                                        ${chart.description}
+                                    </p>
+                                </div>
+                            `;
+                        });
+                        chartsHtml += '</div>';
+                    }
+                    
+                } catch (e) {
+                    console.error('解析圖表資料時發生錯誤：', e);
+                    contentHtml = renderMarkdownWithMath(content);
+                }
+            }
+            // 檢查是否為圖片回應（原有的邏輯）
+            else if (sender === 'bot' && content.startsWith('IMAGE:')) {
                 const parts = content.split('|');
                 const imageUrl = parts[0].substring(6); // 移除 "IMAGE:" 前綴
                 const message = parts[1] || '';
@@ -454,40 +505,50 @@
             messageDiv.innerHTML = `
                 <div class="message-content">
                     ${contentHtml}
+                    ${chartsHtml}
                 </div>
                 ${timeHtml}
             `;
 
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-// 新增圖片放大功能
-function openImageModal(imageUrl) {
-    const modal = document.createElement('div');
-    modal.className = 'image-modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeImageModal()">&times;</span>
-            <img src="${imageUrl}" alt="放大圖片" class="modal-image">
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // 點擊背景關閉
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeImageModal();
         }
-    });
-}
 
-function closeImageModal() {
-    const modal = document.querySelector('.image-modal');
-    if (modal) {
-        modal.remove();
-    }
-}
+        // 修改圖片模態框函數以支援標題
+        function openImageModal(imageUrl, caption = '') {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const captionElement = document.getElementById('imageCaption');
+            
+            if (modal && modalImg) {
+                modal.style.display = 'block';
+                modalImg.src = imageUrl;
+                
+                // 設置圖片標題
+                if (captionElement && caption) {
+                    captionElement.textContent = caption;
+                    captionElement.style.display = 'block';
+                } else if (captionElement) {
+                    captionElement.style.display = 'none';
+                }
+            }
+        }
+
+        // 關閉圖片模態框
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 點擊模態框背景關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeImageModal();
+            }
+        }
 
         // 載入聊天歷史
         async function loadChatHistory() {
@@ -622,78 +683,78 @@ function closeImageModal() {
             checkAuthStatus();
         });
 
-    // Markdown 和數學公式渲染函數
-    function renderMarkdownWithMath(content) {
-        // 先處理數學公式，用更安全的臨時標記保護
-        const mathPlaceholders = [];
-        let mathCounter = 0;
-        
-        // 處理塊級數學公式 $$...$$ (先處理塊級，避免被行內公式干擾)
-        content = content.replace(/\$\$([^$]+?)\$\$/g, (match, formula) => {
-            const placeholder = `ΞMATHBLOCKΞ${mathCounter}ΞENDΞ`;
-            mathPlaceholders.push({
-                type: 'block',
-                formula: formula.trim(),
-                placeholder: placeholder
-            });
-            mathCounter++;
-            return placeholder;
-        });
-        
-        // 處理行內數學公式 $...$
-        content = content.replace(/\$([^$\n]+?)\$/g, (match, formula) => {
-            const placeholder = `ΞMATHINLINEΞ${mathCounter}ΞENDΞ`;
-            mathPlaceholders.push({
-                type: 'inline',
-                formula: formula.trim(),
-                placeholder: placeholder
-            });
-            mathCounter++;
-            return placeholder;
-        });
-        
-        // 配置 marked
-        marked.setOptions({
-            highlight: function(code, lang) {
-                if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
-                    try {
-                        return hljs.highlight(code, { language: lang }).value;
-                    } catch (err) {
-                        return code;
-                    }
-                }
-                return code;
-            },
-            breaks: true,
-            gfm: true
-        });
-        
-        // 渲染 Markdown
-        let html = marked.parse(content);
-        
-        // 還原數學公式並用 KaTeX 渲染
-        mathPlaceholders.forEach(math => {
-            try {
-                const rendered = katex.renderToString(math.formula, {
-                    displayMode: math.type === 'block',
-                    throwOnError: false
+        // Markdown 和數學公式渲染函數
+        function renderMarkdownWithMath(content) {
+            // 先處理數學公式，用更安全的臨時標記保護
+            const mathPlaceholders = [];
+            let mathCounter = 0;
+            
+            // 處理塊級數學公式 $$...$$ (先處理塊級，避免被行內公式干擾)
+            content = content.replace(/\$\$([^$]+?)\$\$/g, (match, formula) => {
+                const placeholder = `ΞMATHBLOCKΞ${mathCounter}ΞENDΞ`;
+                mathPlaceholders.push({
+                    type: 'block',
+                    formula: formula.trim(),
+                    placeholder: placeholder
                 });
-                html = html.replace(new RegExp(escapeRegExp(math.placeholder), 'g'), rendered);
-            } catch (e) {
-                // 如果渲染失敗，保持原始公式
-                const fallback = math.type === 'block' ? `$$${math.formula}$$` : `$${math.formula}$`;
-                html = html.replace(new RegExp(escapeRegExp(math.placeholder), 'g'), fallback);
-                console.warn('KaTeX 渲染失敗:', math.formula, e);
-            }
-        });
-        
-        return html;
-    }
+                mathCounter++;
+                return placeholder;
+            });
+            
+            // 處理行內數學公式 $...$
+            content = content.replace(/\$([^$\n]+?)\$/g, (match, formula) => {
+                const placeholder = `ΞMATHINLINEΞ${mathCounter}ΞENDΞ`;
+                mathPlaceholders.push({
+                    type: 'inline',
+                    formula: formula.trim(),
+                    placeholder: placeholder
+                });
+                mathCounter++;
+                return placeholder;
+            });
+            
+            // 配置 marked
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                        try {
+                            return hljs.highlight(code, { language: lang }).value;
+                        } catch (err) {
+                            return code;
+                        }
+                    }
+                    return code;
+                },
+                breaks: true,
+                gfm: true
+            });
+            
+            // 渲染 Markdown
+            let html = marked.parse(content);
+            
+            // 還原數學公式並用 KaTeX 渲染
+            mathPlaceholders.forEach(math => {
+                try {
+                    const rendered = katex.renderToString(math.formula, {
+                        displayMode: math.type === 'block',
+                        throwOnError: false
+                    });
+                    html = html.replace(new RegExp(escapeRegExp(math.placeholder), 'g'), rendered);
+                } catch (e) {
+                    // 如果渲染失敗，保持原始公式
+                    const fallback = math.type === 'block' ? `$$${math.formula}$$` : `$${math.formula}$`;
+                    html = html.replace(new RegExp(escapeRegExp(math.placeholder), 'g'), fallback);
+                    console.warn('KaTeX 渲染失敗:', math.formula, e);
+                }
+            });
+            
+            return html;
+        }
 
-    // 輔助函數：轉義正則表達式特殊字符
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
+        // 輔助函數：轉義正則表達式特殊字符
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
     </script>
 </body>
