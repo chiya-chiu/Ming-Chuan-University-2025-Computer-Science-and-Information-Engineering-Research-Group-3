@@ -294,7 +294,12 @@ class RAGHelper:
             status = self.get_status()
             error_msg = f"請先執行 setup_retrieval_chain() - 當前狀態: {status}"
             raise ValueError(error_msg)
-        
+
+        async def init_rag():
+        rag = RAGHelper(pdf_folder="path/to/your/pdfs")
+        await rag.load_and_prepare(file_extensions=[".pdf", ".txt"])
+        rag.setup_retrieval_chain()
+        return rag
         if not self.chain_setup:
             raise ValueError("檢索鏈未正確設置，請重新執行 setup_retrieval_chain()")
 
