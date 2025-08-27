@@ -20,7 +20,7 @@ async def main():
         await rag.load_and_prepare(['.pdf', '.txt', '.docx', '.md', '.csv'])  # 載入其他格式檔案：await rag.load_and_prepare(['.pdf', '.txt', '.docx'])
 
         print("設置問答系統...")
-        rag.setup_retrieval_chain()
+        rag.setup_retrieval_chain(k=5, similarity_threshold=1.1)
 
         print("\n=== RAG 問答系統已準備就緒 ===")
         print("輸入問題開始對話，輸入 'quit'、'exit' 或 'q' 結束程式")
