@@ -229,13 +229,13 @@ class RAGHelper:
             self.vectorstore.save_local("my_faiss_index")  # 將向量資料庫存到本地
 
     def setup_retrieval_chain(self, k=5, similarity_threshold=None):
-    """
-    設置檢索鏈
+            """
+            設置檢索鏈
 
-    Args:
-        k (int): 檢索數量
-        similarity_threshold (float, optional): 相似度門檻，如果提供則使用過濾檢索器
-    """
+            Args:
+            k (int): 檢索數量
+            similarity_threshold (float, optional): 相似度門檻，如果提供則使用過濾檢索器
+            """
     if not self.vectorstore:
         raise ValueError("請先執行 load_and_prepare()")
 
