@@ -229,13 +229,13 @@ class RAGHelper:
             self.vectorstore.save_local("my_faiss_index")  # 將向量資料庫存到本地
 
     def setup_retrieval_chain(self, k=5, similarity_threshold=None):
-            """
-            設置檢索鏈
+    """
+    設置檢索鏈
 
-            Args:
-            k (int): 檢索數量
-            similarity_threshold (float, optional): 相似度門檻，如果提供則使用過濾檢索器
-            """
+    Args:
+        k (int): 檢索數量
+        similarity_threshold (float, optional): 相似度門檻
+    """
     if not self.vectorstore:
         raise ValueError("請先執行 load_and_prepare()")
 
@@ -243,18 +243,11 @@ class RAGHelper:
 
     # 根據是否有相似度門檻選擇不同的檢索器
     if similarity_threshold is not None:
-        # 使用帶有相似度門檻的檢索器
         print(f"設置相似度門檻檢索器 (k={k}, threshold={similarity_threshold})")
-        
-        # 創建一個簡單的包裝函數而不是複雜的類
+
         def threshold_retriever_func(query: str) -> List[Document]:
             return self.retrieve_documents(query, k, similarity_threshold)
-        
-        # 使用 LangChain 的 create_retriever_tool 或直接創建簡化版本
-        from langchain.schema.retriever import BaseRetriever
-        from langchain.callbacks.manager import CallbackManagerForRetrieverRun
-        from typing import List
-        
+
         class SimpleThresholdRetriever(BaseRetriever):
             def __init__(self, retriever_func, k: int, threshold: float):
                 super().__init__()
@@ -276,21 +269,14 @@ class RAGHelper:
                 return {"k": self.k, "threshold": self.threshold}
 
         retriever = SimpleThresholdRetriever(threshold_retriever_func, k, similarity_threshold)
-        
+
     else:
-        # 使用標準檢索器
         print(f"設置標準檢索器 (k={k})")
         retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
 
     # 創建提示詞模板
     system_prompt = (
-        "你是一個基於 RAG 系統的計算機概論家教。請參考以下提供的內容來回答問題。"
-        "用詞上請多使用正向鼓勵的詞語，並基於現有問題延伸出更多相關的問題。"
-        "請針對問題舉出簡單好懂的比喻或例子。"
-        "如果不知道如何回答問題，請說出來。"
-        "如果問題和計算機概論無關，請做出提醒，並且不要回答問題"
-        "使用 LaTeX 時，請使用 $ 符號作為塊級公式"
-        "請用繁體中文回答。\n\n"
+        "你是一個基於 RAG 系統的計算機概論家教..."
         "{context}"
     )
     
@@ -300,24 +286,16 @@ class RAGHelper:
     ])
     
     try:
-        # 創建文檔合併鏈
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
-        # 創建檢索鏈
         self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
-        
-        # 驗證創建是否成功
+
         if self.retrieval_chain is None:
             raise RuntimeError("檢索鏈創建失敗")
-            
+
         print("檢索鏈設置完成")
-        
-        # 測試檢索器是否正常工作
-        test_docs = retriever.get_relevant_documents("測試查詢")
-        print(f"檢索器測試完成，返回 {len(test_docs)} 個文檔")
-        
+
     except Exception as e:
         print(f"設置檢索鏈時發生錯誤: {e}")
-        # 如果使用門檻檢索器失敗，回退到標準檢索器
         if similarity_threshold is not None:
             print("回退到標準檢索器")
             retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
@@ -325,7 +303,6 @@ class RAGHelper:
             self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
         else:
             raise e
-
     def setup_retrieval_chain_with_shorter_context(self):
         """設置更短上下文的檢索鏈"""
         if not self.vectorstore:
