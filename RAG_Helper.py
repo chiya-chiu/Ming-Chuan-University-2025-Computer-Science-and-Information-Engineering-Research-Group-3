@@ -118,37 +118,35 @@ class RAGHelper:
         try:
             # 使用 similarity_search_with_score 獲取帶有分數的結果
             docs_with_scores = self.vectorstore.similarity_search_with_score(
-                query, k=k*2  # 檢索更多候選，然後過濾
+                query, k=k
             )
 
             # 根據相似度門檻過濾
             filtered_docs = []
-            print(f"🔍 檢索到 {len(docs_with_scores)} 個結果，應用相似度門檻 {similarity_threshold}")
+            #print(f"🔍 檢索到 {len(docs_with_scores)} 個結果，應用相似度門檻 {similarity_threshold}")
 
             for doc, score in docs_with_scores:
-                print(f"📄 距離分數: {score:.4f}")
-                print(f"   文件預覽: {doc.page_content[:100]}...")
+                # FAISS 使用歐幾里得距離，分數越低表示越相似
+                # 轉換為相似度百分比（可選）
+                # similarity = 1 / (1 + score)  # 轉換公式，讓分數越高表示越相似
+
+                #print(f"📄 距離分數: {score:.4f}")
+                #print(f"   文件預覽: {doc.page_content[:100]}...")
 
                 # 直接使用距離分數進行比較（分數越低越相似）
                 if score <= similarity_threshold:
                     filtered_docs.append(doc)
-                    print(f"   ✅ 通過門檻，保留此文件")
-                else:
-                    print(f"   ❌ 高於門檻 {similarity_threshold}，過濾此文件")
+                    #print(f"   ✅ 通過門檻，保留此文件")
+                #else:
+                    #print(f"   ❌ 高於門檻 {similarity_threshold}，過濾此文件")
 
-            print(f"📊 過濾結果：{len(docs_with_scores)} -> {len(filtered_docs)} 個文件")
-            
-            # 如果過濾後沒有文件，返回最相似的幾個
-            if not filtered_docs and docs_with_scores:
-                print("⚠️ 沒有文件通過門檻，返回最相似的文件")
-                filtered_docs = [doc for doc, score in docs_with_scores[:k]]
-            
-            return filtered_docs[:k]  # 限制最終返回數量
+            #print(f"📊 過濾結果：{len(docs_with_scores)} -> {len(filtered_docs)} 個文件")
+            return filtered_docs
 
         except Exception as e:
             print(f"❌ 檢索過程中發生錯誤: {e}")
             return []
-            
+
     def get_retriever_with_threshold(self, k=5, similarity_threshold=0.7):
         """
         創建一個帶有相似度門檻的自定義檢索器
@@ -234,75 +232,85 @@ class RAGHelper:
 
         Args:
             k (int): 檢索數量
-            similarity_threshold (float, optional): 相似度門檻
+            similarity_threshold (float, optional): 相似度門檻，如果提供則使用過濾檢索器
         """
         if not self.vectorstore:
             raise ValueError("請先執行 load_and_prepare()")
 
         llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
 
-    # 根據是否有相似度門檻選擇不同的檢索器
+        # 根據是否有相似度門檻選擇不同的檢索器
         if similarity_threshold is not None:
-            print(f"設置相似度門檻檢索器 (k={k}, threshold={similarity_threshold})")
+            # 使用帶有相似度門檻的檢索器
+            from langchain.schema import BaseRetriever
+            from langchain.callbacks.manager import CallbackManagerForRetrieverRun
+            from typing import List
+            from langchain.schema import Document
 
-            def threshold_retriever_func(query: str) -> List[Document]:
-                return self.retrieve_documents(query, k, similarity_threshold)
+            class ThresholdRetriever(BaseRetriever):
+                _rag_helper: "RAGHelper" = PrivateAttr()
+                _k: int = PrivateAttr()
+                _threshold: float = PrivateAttr()
 
-        class SimpleThresholdRetriever(BaseRetriever):
-            def __init__(self, retriever_func, k: int, threshold: float):
-                super().__init__()
-                self.retriever_func = retriever_func
-                self.k = k 
-                self.threshold = threshold
+                def __init__(self, rag_helper: "RAGHelper", k: int, threshold: float):
+                    super().__init__()
+                    self._rag_helper = rag_helper
+                    self._k = k
+                    self._threshold = threshold
 
-            def _get_relevant_documents(
-                self, query: str, *, run_manager: CallbackManagerForRetrieverRun = None
-            ) -> List[Document]:
-                try:
-                    return self.retriever_func(query)
-                except Exception as e:
-                    print(f"檢索器執行錯誤: {e}")
-                    return []
+                def _get_relevant_documents(
+                        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
+                ) -> List[Document]:
+                    return self._rag_helper.retrieve_documents(query, self._k, self._threshold)
 
-            @property  
-            def _identifying_params(self):
-                return {"k": self.k, "threshold": self.threshold}
+                @property
+                def _identifying_params(self):
+                    return {"k": self._k, "threshold": self._threshold}
 
-        retriever = SimpleThresholdRetriever(threshold_retriever_func, k, similarity_threshold)
+            retriever = ThresholdRetriever(self, k, similarity_threshold)
+            #print(f"🎯 使用相似度門檻檢索器 (k={k}, threshold={similarity_threshold})")
+        else:
+            # 使用標準檢索器
+            retriever = self.vectorstore.as_retriever(
+                search_kwargs={"k": k}
+            )
+            #print(f"📋 使用標準檢索器 (k={k})")
 
-    else:
-        print(f"設置標準檢索器 (k={k})")
-        retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
-
-    # 創建提示詞模板
-    system_prompt = (
-        "你是一個基於 RAG 系統的計算機概論家教..."
-        "{context}"
-    )
-    
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        ("human", "{input}"),
-    ])
-    
-    try:
+        # 創建提示詞模板
+        system_prompt = (
+            "你是一個基於 RAG 系統的計算機概論家教。請參考以下提供的內容來回答問題。"
+            "用詞上請多使用正向鼓勵的詞語，並基於現有問題延伸出更多相關的問題。"
+            "請針對問題舉出簡單好懂的比喻或例子。"
+            "如果不知道如何回答問題，請說出來。"
+            "如果問題和計算機概論無關，請做出提醒，並且不要回答問題"
+            "使用 LaTeX 時，請使用 $ 符號作為塊級公式"
+            "請用繁體中文回答。\n\n"
+            "{context}"
+        )
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", system_prompt),
+            ("human", "{input}"),
+        ])
+        # 創建文檔合併鏈
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
+        # 創建檢索鏈
         self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
 
-        if self.retrieval_chain is None:
-            raise RuntimeError("檢索鏈創建失敗")
+    def ask(self, query):
+        if not self.retrieval_chain:
+            raise ValueError("請先執行 setup_retrieval_chain()")
+        try:
+            result = self.retrieval_chain.invoke({"input": query})  # 將使用者的問題傳給問答鏈，鏈內部會檢索並將檢索到的段落和問題交給大語言模型
+            return result["answer"], result["context"]  # result["answer"] 是 語言模型給的答案，result["context"]  是檢索到的原始段落
+        except Exception as e:
+            if "max_tokens_per_request" in str(e):
+                print("內容過長，嘗試使用較短的上下文...")
+                self.setup_retrieval_chain_with_shorter_context()
+                result = self.retrieval_chain.invoke({"input": query})
+                return result["answer"], result["context"]
+            else:
+                raise e
 
-        print("檢索鏈設置完成")
-
-    except Exception as e:
-        print(f"設置檢索鏈時發生錯誤: {e}")
-        if similarity_threshold is not None:
-            print("回退到標準檢索器")
-            retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
-            question_answer_chain = create_stuff_documents_chain(llm, prompt)
-            self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
-        else:
-            raise e
     def setup_retrieval_chain_with_shorter_context(self):
         """設置更短上下文的檢索鏈"""
         if not self.vectorstore:
