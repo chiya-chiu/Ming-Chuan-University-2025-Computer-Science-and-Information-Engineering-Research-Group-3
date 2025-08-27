@@ -236,10 +236,10 @@ class RAGHelper:
             k (int): 檢索數量
             similarity_threshold (float, optional): 相似度門檻
         """
-    if not self.vectorstore:
-        raise ValueError("請先執行 load_and_prepare()")
+        if not self.vectorstore:
+            raise ValueError("請先執行 load_and_prepare()")
 
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
+        llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
 
     # 根據是否有相似度門檻選擇不同的檢索器
     if similarity_threshold is not None:
