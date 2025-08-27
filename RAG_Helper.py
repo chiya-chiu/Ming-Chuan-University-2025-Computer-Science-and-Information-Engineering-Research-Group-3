@@ -242,11 +242,11 @@ class RAGHelper:
         llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
 
     # 根據是否有相似度門檻選擇不同的檢索器
-    if similarity_threshold is not None:
-        print(f"設置相似度門檻檢索器 (k={k}, threshold={similarity_threshold})")
+        if similarity_threshold is not None:
+            print(f"設置相似度門檻檢索器 (k={k}, threshold={similarity_threshold})")
 
-        def threshold_retriever_func(query: str) -> List[Document]:
-            return self.retrieve_documents(query, k, similarity_threshold)
+            def threshold_retriever_func(query: str) -> List[Document]:
+                return self.retrieve_documents(query, k, similarity_threshold)
 
         class SimpleThresholdRetriever(BaseRetriever):
             def __init__(self, retriever_func, k: int, threshold: float):
