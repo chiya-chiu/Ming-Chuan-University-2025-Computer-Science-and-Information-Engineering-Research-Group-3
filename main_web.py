@@ -113,24 +113,20 @@ async def lifespan(app: FastAPI):
     test_db_connection()
     init_database()
     print("✅ 資料庫初始化完成")
+
+    global rag_instance
+    if not os.getenv("OPENAI_API_KEY"):
+        print("⚠️ OPENAI_API_KEY 尚未設定")
+    elif not os.path.exists("./pdfFiles"):
+        print("⚠️ pdfFiles 資料夾不存在")
+    else:
+        print("🚀 初始化 RAG 系統...")
+        rag_instance = RAGHelper(pdf_folder="./pdfFiles", chunk_size=300, chunk_overlap=50)
+        await rag_instance.load_and_prepare(['.pdf', '.txt', '.docx', '.md', '.csv'])
+        rag_instance.setup_retrieval_chain(k=5, similarity_threshold=0.45)
+        print("✅ RAG 系統已就緒")
+
     yield
-
-app = FastAPI(
-    title="RAG 問答系統",
-    description="基於文件的智能問答系統（含帳號管理）",
-    lifespan=lifespan
-)
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # 全域 RAG 實例
 rag_instance: Optional[RAGHelper] = None
 security = HTTPBearer()
