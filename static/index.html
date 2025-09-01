@@ -431,6 +431,14 @@
             }
         }
 
+        // 通用：捲到最底
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
         function addMessage(content, sender, sources = null, timestamp = null) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
@@ -511,7 +519,13 @@
             `;
 
             chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+             // ⚡ 新訊息立即捲到底
+            scrollToBottom();
+
+            // ⚡ 若有圖片，等圖片載入後再補一次
+            messageDiv.querySelectorAll("img").forEach(img => {
+                img.onload = scrollToBottom;
+            });
         }
 
         // 修改圖片模態框函數以支援標題
@@ -556,28 +570,28 @@
                 const response = await fetch('/chat/history?limit=50', {
                     headers: getAuthHeaders()
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     const chatMessages = document.getElementById('chatMessages');
-                    
-                    // 清空現有訊息（除了歡迎訊息）
+
+                    // 清空現有訊息（保留歡迎詞）
                     chatMessages.innerHTML = '<div class="welcome-message" id="welcomeMessage">啟動學習模式，今天也加油～</div>';
-                    
-                    // 反向遍歷歷史紀錄（因為後端是倒序，前端要正序顯示）
+
+                    // 反向顯示歷史訊息
                     data.history.reverse().forEach(item => {
                         addMessage(item.question, 'user', null, item.timestamp);
                         addMessage(item.answer, 'bot', null, item.timestamp);
                     });
-                    
-                    // 如果有歷史紀錄，隱藏歡迎訊息
+
+                    // 有歷史 → 隱藏歡迎詞
                     if (data.history.length > 0) {
                         document.getElementById('welcomeMessage').style.display = 'none';
                     }
-                    
-                    // 顯示載入的歷史數量
-                    console.log(`載入了 ${data.history.length} 筆歷史對話`);
-                    
+
+                    // ⚡ 所有歷史訊息載入完成後，強制捲到底
+                    setTimeout(scrollToBottom, 100);
+
                 } else if (response.status === 401) {
                     logout();
                 }

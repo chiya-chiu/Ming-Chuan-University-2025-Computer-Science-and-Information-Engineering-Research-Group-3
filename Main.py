@@ -20,7 +20,7 @@ async def main():
         await rag.load_and_prepare(['.pdf', '.txt', '.docx', '.md', '.csv'])  # 載入其他格式檔案：await rag.load_and_prepare(['.pdf', '.txt', '.docx'])
 
         print("設置問答系統...")
-        rag.setup_retrieval_chain(k=5, similarity_threshold=1.1)
+        rag.setup_retrieval_chain(k=5, similarity_threshold=0.45)
 
         print("\n=== RAG 問答系統已準備就緒 ===")
         print("輸入問題開始對話，輸入 'quit'、'exit' 或 'q' 結束程式")
@@ -41,7 +41,7 @@ async def main():
                 print("\n來源頁面：")
                 for i, doc in enumerate(sources, 1):
                     source = doc.metadata.get('source', '未知來源')
-                    page = doc.metadata.get('page', '未知頁數') + 1
+                    page = doc.metadata.get('page', '未知頁數')
                     print(f"{i}. 來源：{os.path.basename(str(source))}, 頁數：{page}")
 
                     # 顯示部分內容（可選）

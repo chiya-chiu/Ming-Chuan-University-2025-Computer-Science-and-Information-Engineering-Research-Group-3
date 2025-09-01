@@ -1,0 +1,27 @@
+2.3 Nonposaitional number systems
+Roman number system
+I V X L C D M
+1510501005001000
+兩數相比⼩數字放左為減，放右為加
+ex : XIX–->10+(-1+10)=19
+Chapter 3.
+3.2 Storing Number
+ unsigned integers
+空位補 0
+ex : (7)–->(111)–->(0111)4bits
+ sign and magnitude number
+⾸位數字決定正負
+0–-> 正
+1–-> 負
+ overflow 溢位
+若數字到達 bits 所能表達的上限，下⼀個數字將進位導致溢位
+A+B=C dec bin(4bits)
+A 141110
+B 9 1001
+C( 正解，但溢位 ) 2310111
+顯⽰錯誤 7 0111
+負數同理
+ two's complement (NOT+1)
+10 2 2
+(http 計 T r y     H a c k M D
+( h t t p s : / / h a c k m d . i o ? u t m _ s o u r c e = v i e w - p a g e & u t m _ m e d i u m = l o g o - n a v )

@@ -128,24 +128,50 @@ class RAGHelper:
             for doc, score in docs_with_scores:
                 # FAISS 使用歐幾里得距離，分數越低表示越相似
                 # 轉換為相似度百分比（可選）
-                # similarity = 1 / (1 + score)  # 轉換公式，讓分數越高表示越相似
+
 
                 #print(f"📄 距離分數: {score:.4f}")
                 #print(f"   文件預覽: {doc.page_content[:100]}...")
 
+                similarity = 1 / (1 + score)  # 轉換公式，讓分數越高表示越相似
                 # 直接使用距離分數進行比較（分數越低越相似）
-                if score <= similarity_threshold:
-                    filtered_docs.append(doc)
+                if similarity >= similarity_threshold:
+                    filtered_docs.append((doc, similarity))
                     #print(f"   ✅ 通過門檻，保留此文件")
                 #else:
                     #print(f"   ❌ 高於門檻 {similarity_threshold}，過濾此文件")
 
             #print(f"📊 過濾結果：{len(docs_with_scores)} -> {len(filtered_docs)} 個文件")
-            return filtered_docs
+
+            weighted_docs = self._calculate_weights(filtered_docs)
+            return weighted_docs
 
         except Exception as e:
             print(f"❌ 檢索過程中發生錯誤: {e}")
             return []
+
+    def _calculate_weights(self, docs_with_scores):
+        """
+        計算權重，並直接修改 doc.page_content 在前面加上「重要性 XX%」
+        Args:
+            docs_with_scores (list): [(doc, similarity), ...]
+
+        Returns:
+            list: [(doc, similarity, weight), ...]
+        """
+        if not docs_with_scores:
+            return []
+
+        weighted_docs = []
+        for i, (doc, sim) in enumerate(docs_with_scores):
+            # weight =  sim  / total_similarity
+
+            # ✅ 直接修改 doc.page_content
+            doc.page_content = f"重要性第 {i + 1}名 {doc.page_content}"
+
+            weighted_docs.append(doc)
+
+        return weighted_docs
 
     def get_retriever_with_threshold(self, k=5, similarity_threshold=0.7):
         """
@@ -237,7 +263,7 @@ class RAGHelper:
         if not self.vectorstore:
             raise ValueError("請先執行 load_and_prepare()")
 
-        llm = ChatOpenAI(model="gpt-4o", temperature=0.2)
+        llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
 
         # 根據是否有相似度門檻選擇不同的檢索器
         if similarity_threshold is not None:
@@ -278,11 +304,11 @@ class RAGHelper:
 
         # 創建提示詞模板
         system_prompt = (
-            "你是一個基於 RAG 系統的計算機概論家教。請參考以下提供的內容來回答問題。"
+            "你是一個基於 RAG 系統的計算機概論家教。請參考提供的內容來回答問題。"
+            "如果問題和計算機概論無關，不要回答問題，告訴使用者問計算機概論相關問題"
+            "如果不知道如何回答問題或是問題沒意義，請提醒輸入更多資訊。"  
             "用詞上請多使用正向鼓勵的詞語，並基於現有問題延伸出更多相關的問題。"
             "請針對問題舉出簡單好懂的比喻或例子。"
-            "如果不知道如何回答問題，請說出來。"
-            "如果問題和計算機概論無關，請做出提醒，並且不要回答問題"
             "使用 LaTeX 時，請使用 $ 符號作為塊級公式"
             "請用繁體中文回答。\n\n"
             "{context}"

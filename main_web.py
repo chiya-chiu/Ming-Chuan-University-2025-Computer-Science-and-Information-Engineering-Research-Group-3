@@ -349,7 +349,7 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
     try:
         rag_instance = RAGHelper(pdf_folder="./pdfFiles", chunk_size=300, chunk_overlap=50)
         await rag_instance.load_and_prepare(['.pdf', '.txt', '.docx', '.md', '.csv'])
-        rag_instance.setup_retrieval_chain(k=5, similarity_threshold=1.1)
+        rag_instance.setup_retrieval_chain(k=5, similarity_threshold=0.45)
 
         return StatusResponse(
             status="success",
