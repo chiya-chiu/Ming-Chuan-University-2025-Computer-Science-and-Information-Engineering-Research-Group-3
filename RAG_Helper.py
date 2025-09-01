@@ -14,8 +14,7 @@ from pydantic import PrivateAttr
 from langchain.schema import BaseRetriever, Document
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from typing import List
-import nest_asyncio
-nest_asyncio.apply()
+
 
 # 可以讀取不同的檔案格式
 from langchain_community.document_loaders import (
@@ -259,20 +258,13 @@ class RAGHelper:
             self._build_vectorstore(all_chunks)  # 將文字轉成向量，並建立向量資料庫
             self.vectorstore.save_local("my_faiss_index")  # 將向量資料庫存到本地
 
-    def setup_retrieval_chain(self, k=5, similarity_threshold=None, auto_prepare=True, file_extensions=None):
-        """
-        設置檢索鏈，如果 auto_prepare=True，會自動建立 vectorstore
-        """
-        import asyncio
+    async def setup_retrieval_chain(self, k=5, similarity_threshold=None, auto_prepare=True, file_extensions=None):
+          if auto_prepare:
+          if not self.vectorstore:
+            await self.ensure_vectorstore(file_extensions)
 
-        if auto_prepare:
-            # 如果 vectorstore 還沒建立，自動建立
-            if not self.vectorstore:
-                loop = asyncio.get_event_loop()
-                loop.run_until_complete(self.ensure_vectorstore(file_extensions))
-
-        if not self.vectorstore:
-            raise ValueError("向量資料庫建立失敗，請先檢查資料夾")
+    # 下面原本的程式碼不變
+    llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
 
         llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
 
