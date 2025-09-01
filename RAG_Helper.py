@@ -41,6 +41,11 @@ class RAGHelper:
         self.splitter_instance.NUMBERED_HEADERS_ONLY = False  # 不要求標題有編號
         self.splitter_instance.SMART_CONSOLIDATE = True  # 啟用智能合併
 
+    async def ensure_vectorstore(self, file_extensions=None):
+        """確保 vectorstore 已建立，沒有就自動建立"""
+        if not self.vectorstore:
+            await self.load_and_prepare(file_extensions)
+
     def get_loader(self, path: str):
         ext = Path(path).suffix.lower()
         if ext == ".pdf":
@@ -252,26 +257,29 @@ class RAGHelper:
             self._build_vectorstore(all_chunks)  # 將文字轉成向量，並建立向量資料庫
             self.vectorstore.save_local("my_faiss_index")  # 將向量資料庫存到本地
 
-    def setup_retrieval_chain(self, k=5, similarity_threshold=None):
+    def setup_retrieval_chain(self, k=5, similarity_threshold=None, auto_prepare=True, file_extensions=None):
         """
-        設置檢索鏈
+        設置檢索鏈，如果 auto_prepare=True，會自動建立 vectorstore
+        """
+        import asyncio
 
-        Args:
-            k (int): 檢索數量
-            similarity_threshold (float, optional): 相似度門檻，如果提供則使用過濾檢索器
-        """
+        if auto_prepare:
+            # 如果 vectorstore 還沒建立，自動建立
+            if not self.vectorstore:
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(self.ensure_vectorstore(file_extensions))
+
         if not self.vectorstore:
-            raise ValueError("請先執行 load_and_prepare()")
+            raise ValueError("向量資料庫建立失敗，請先檢查資料夾")
 
         llm = ChatOpenAI(model="gpt-4o", temperature=0.1)
 
-        # 根據是否有相似度門檻選擇不同的檢索器
         if similarity_threshold is not None:
-            # 使用帶有相似度門檻的檢索器
-            from langchain.schema import BaseRetriever
+            # 使用帶門檻的自定義檢索器
+            from langchain.schema import BaseRetriever, Document
             from langchain.callbacks.manager import CallbackManagerForRetrieverRun
+            from pydantic import PrivateAttr
             from typing import List
-            from langchain.schema import Document
 
             class ThresholdRetriever(BaseRetriever):
                 _rag_helper: "RAGHelper" = PrivateAttr()
@@ -284,9 +292,7 @@ class RAGHelper:
                     self._k = k
                     self._threshold = threshold
 
-                def _get_relevant_documents(
-                        self, query: str, *, run_manager: CallbackManagerForRetrieverRun
-                ) -> List[Document]:
+                def _get_relevant_documents(self, query: str, *, run_manager: CallbackManagerForRetrieverRun) -> List[Document]:
                     return self._rag_helper.retrieve_documents(query, self._k, self._threshold)
 
                 @property
@@ -294,15 +300,9 @@ class RAGHelper:
                     return {"k": self._k, "threshold": self._threshold}
 
             retriever = ThresholdRetriever(self, k, similarity_threshold)
-            #print(f"🎯 使用相似度門檻檢索器 (k={k}, threshold={similarity_threshold})")
         else:
-            # 使用標準檢索器
-            retriever = self.vectorstore.as_retriever(
-                search_kwargs={"k": k}
-            )
-            #print(f"📋 使用標準檢索器 (k={k})")
+            retriever = self.vectorstore.as_retriever(search_kwargs={"k": k})
 
-        # 創建提示詞模板
         system_prompt = (
             "你是一個基於 RAG 系統的計算機概論家教。請參考提供的內容來回答問題。"
             "如果問題和計算機概論無關，不要回答問題，告訴使用者問計算機概論相關問題"
@@ -317,20 +317,23 @@ class RAGHelper:
             ("system", system_prompt),
             ("human", "{input}"),
         ])
-        # 創建文檔合併鏈
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
-        # 創建檢索鏈
         self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
 
-    def ask(self, query):
+    def ask(self, query, auto_setup=True):
+        """自動 fallback，如果 retrieval_chain 沒建立，會自動建立"""
+        import asyncio
+        if auto_setup and not self.retrieval_chain:
+            self.setup_retrieval_chain()
+
         if not self.retrieval_chain:
-            raise ValueError("請先執行 setup_retrieval_chain()")
+            raise ValueError("檢索鏈建立失敗，請先執行 setup_retrieval_chain() 或 auto_setup=True")
+
         try:
-            result = self.retrieval_chain.invoke({"input": query})  # 將使用者的問題傳給問答鏈，鏈內部會檢索並將檢索到的段落和問題交給大語言模型
-            return result["answer"], result["context"]  # result["answer"] 是 語言模型給的答案，result["context"]  是檢索到的原始段落
+            result = self.retrieval_chain.invoke({"input": query})
+            return result["answer"], result["context"]
         except Exception as e:
             if "max_tokens_per_request" in str(e):
-                print("內容過長，嘗試使用較短的上下文...")
                 self.setup_retrieval_chain_with_shorter_context()
                 result = self.retrieval_chain.invoke({"input": query})
                 return result["answer"], result["context"]
