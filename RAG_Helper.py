@@ -14,6 +14,8 @@ from pydantic import PrivateAttr
 from langchain.schema import BaseRetriever, Document
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from typing import List
+import nest_asyncio
+nest_asyncio.apply()
 
 # 可以讀取不同的檔案格式
 from langchain_community.document_loaders import (
