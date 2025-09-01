@@ -1,21 +1,15 @@
-import glob
-import os
-import uuid
+import glob, os, uuid
 from pathlib import Path
-from typing import List
-
-import nest_asyncio
-nest_asyncio.apply()  # 避免 "event loop already running"
-
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
+from pydantic import PrivateAttr
 from langchain.schema import BaseRetriever, Document
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
-from pydantic import PrivateAttr
+from typing import List
 
 from langchain_community.document_loaders import (
     PyPDFLoader, TextLoader, CSVLoader,
@@ -27,14 +21,14 @@ from Split_Helper import SplitHelper
 
 
 class RAGHelper:
-    def __init__(self, pdf_folder: str, chunk_size=300, chunk_overlap=50,
-                 pdf_target_len=500, pdf_tolerance=100):
+    def __init__(self, pdf_folder, chunk_size=300, chunk_overlap=50, pdf_target_len=500,
+                 pdf_tolerance=100):
         self.pdf_folder = pdf_folder
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.pdf_target_len = pdf_target_len
         self.pdf_tolerance = pdf_tolerance
-        self.vectorstore: FAISS | None = None
+        self.vectorstore = None
         self.retrieval_chain = None
 
         self.splitter_instance = SplitHelper()
@@ -42,7 +36,10 @@ class RAGHelper:
         self.splitter_instance.NUMBERED_HEADERS_ONLY = False
         self.splitter_instance.SMART_CONSOLIDATE = True
 
-    # -------------------- 檔案載入與向量庫建立 -------------------- #
+    async def ensure_vectorstore(self, file_extensions=None):
+        if not self.vectorstore:
+            await self.load_and_prepare(file_extensions)
+
     def get_loader(self, path: str):
         ext = Path(path).suffix.lower()
         if ext == ".pdf":
@@ -79,43 +76,50 @@ class RAGHelper:
 
     def _build_vectorstore(self, documents):
         from langchain.schema import Document as LangchainDocument
-
         formatted_docs = []
+
         for i, doc in enumerate(documents):
-            metadata = getattr(doc, "metadata", {}) or {}
+            metadata = doc.metadata.copy() if hasattr(doc, 'metadata') and doc.metadata else {}
             metadata['id'] = f"doc_{i}_{uuid.uuid4().hex[:8]}"
-            formatted_doc = LangchainDocument(
-                page_content=getattr(doc, "page_content", str(doc)),
+            formatted_docs.append(LangchainDocument(
+                page_content=doc.page_content if hasattr(doc, 'page_content') else str(doc),
                 metadata=metadata
-            )
-            formatted_docs.append(formatted_doc)
+            ))
 
         embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
         self.vectorstore = FAISS.from_documents(formatted_docs, embeddings)
 
-    async def load_and_prepare(self, file_extensions=None):
-        """非同步載入檔案並建立向量資料庫"""
-        print("開始載入檔案...")
+    def retrieve_documents(self, query: str, k: int, threshold: float) -> List[Document]:
+        """添加這個方法來支持相似度門檻檢索"""
+        if not self.vectorstore:
+            return []
+        
+        # 使用相似度搜尋並過濾結果
+        docs_with_scores = self.vectorstore.similarity_search_with_score(query, k=k*2)  # 取更多結果以便過濾
+        filtered_docs = [doc for doc, score in docs_with_scores if score >= threshold]
+        return filtered_docs[:k]  # 返回前k個結果
 
+    async def load_and_prepare(self, file_extensions=None):
         if os.path.exists("my_faiss_index"):
-            print("已偵測到現有向量資料庫，直接載入...")
-            self.vectorstore = FAISS.load_local(
-                "my_faiss_index",
-                OpenAIEmbeddings(model="text-embedding-3-small"),
-                allow_dangerous_deserialization=True
-            )
-            return
+            try:
+                self.vectorstore = FAISS.load_local(
+                    "my_faiss_index",
+                    OpenAIEmbeddings(model="text-embedding-3-small"),
+                    allow_dangerous_deserialization=True
+                )
+                return
+            except Exception as e:
+                print(f"載入現有索引失敗，將重新建立: {e}")
 
         if file_extensions is None:
             file_extensions = ['.pdf']
 
         all_chunks = []
-        for ext in file_extensions:
-            for path in glob.glob(os.path.join(self.pdf_folder, f"*{ext}")):
-                try:
-                    fname = os.path.basename(path)
-                    print(f"讀取中: {fname}")
 
+        for ext in file_extensions:
+            pattern = os.path.join(self.pdf_folder, f"*{ext}")
+            for path in glob.glob(pattern):
+                try:
                     if Path(path).suffix.lower() == ".pdf":
                         docs = self.splitter_instance.chunk_pdf_full_page(
                             pdf_path=path,
@@ -123,28 +127,23 @@ class RAGHelper:
                             tol=self.pdf_tolerance
                         )
                         all_chunks.extend(docs)
-                        print(f" {fname}（PDF 智慧切）完成，共 {len(docs)} 段")
                     else:
                         pages = await self.load_any_file_async(path)
                         chunks = self._split_documents(pages)
                         all_chunks.extend(chunks)
-                        print(f" {fname} 分割完成，共 {len(chunks)} 段")
                 except Exception as e:
-                    print(f"載入 {fname} 發生錯誤: {e}")
+                    print(f"處理檔案 {path} 時發生錯誤: {e}")
+                    continue
 
         if not all_chunks:
-            raise ValueError("沒有成功載入任何文件")
+            raise ValueError(f"在 {self.pdf_folder} 中沒有找到有效的檔案")
 
         self._build_vectorstore(all_chunks)
         self.vectorstore.save_local("my_faiss_index")
-        print(f"向量資料庫建立完成，共 {len(all_chunks)} 段")
 
-    # -------------------- 檢索與問答 -------------------- #
-    async def setup_retrieval_chain(self, k=5, similarity_threshold=None,
-                                    auto_prepare=True, file_extensions=None):
-        """非同步建立檢索鏈"""
+    async def setup_retrieval_chain(self, k=5, similarity_threshold=None, auto_prepare=True, file_extensions=None):
         if auto_prepare and not self.vectorstore:
-            await self.load_and_prepare(file_extensions)
+            await self.ensure_vectorstore(file_extensions)
 
         if not self.vectorstore:
             raise ValueError("向量資料庫建立失敗")
@@ -153,19 +152,13 @@ class RAGHelper:
 
         if similarity_threshold is not None:
             class ThresholdRetriever(BaseRetriever):
-                _rag_helper: "RAGHelper" = PrivateAttr()
-                _k: int = PrivateAttr()
-                _threshold: float = PrivateAttr()
-
                 def __init__(self, rag_helper: "RAGHelper", k: int, threshold: float):
                     super().__init__()
                     self._rag_helper = rag_helper
                     self._k = k
                     self._threshold = threshold
 
-                def _get_relevant_documents(
-                    self, query: str, *, run_manager: CallbackManagerForRetrieverRun
-                ) -> List[Document]:
+                def _get_relevant_documents(self, query: str, *, run_manager: CallbackManagerForRetrieverRun = None) -> List[Document]:
                     return self._rag_helper.retrieve_documents(query, self._k, self._threshold)
 
                 @property
@@ -188,24 +181,11 @@ class RAGHelper:
         )
         prompt = ChatPromptTemplate.from_messages([
             ("system", system_prompt),
-            ("human", "{input}")
+            ("human", "{input}"),
         ])
         question_answer_chain = create_stuff_documents_chain(llm, prompt)
         self.retrieval_chain = create_retrieval_chain(retriever, question_answer_chain)
 
-    def retrieve_documents(self, query, k=5, similarity_threshold=0.7):
-        """檢索相關文件並過濾"""
-        if not self.vectorstore:
-            print("❌ 向量資料庫未初始化")
-            return []
-
-        docs_with_scores = self.vectorstore.similarity_search_with_score(query, k=k)
-        filtered = [(doc, 1/(1+score)) for doc, score in docs_with_scores if 1/(1+score) >= similarity_threshold]
-        for i, (doc, sim) in enumerate(filtered):
-            doc.page_content = f"重要性第 {i+1}名 {doc.page_content}"
-        return [doc for doc, _ in filtered]
-
-    # -------------------- 非同步問答 -------------------- #
     async def ask(self, query, auto_setup=True):
         if auto_setup and not self.retrieval_chain:
             await self.setup_retrieval_chain()
@@ -213,5 +193,46 @@ class RAGHelper:
         if not self.retrieval_chain:
             raise ValueError("檢索鏈未建立")
 
-        result = self.retrieval_chain.invoke({"input": query})
-        return result["answer"], result["context"]
+        try:
+            result = self.retrieval_chain.invoke({"input": query})
+            return result["answer"], result["context"]
+        except Exception as e:
+            print(f"檢索時發生錯誤: {e}")
+            raise
+
+
+# 使用範例 - 正確的異步調用方式
+async def example_usage():
+    """示範如何正確使用 RAGHelper"""
+    rag = RAGHelper(pdf_folder="./documents")
+    
+    # 方法 1: 分步驟調用
+    await rag.ensure_vectorstore(['.pdf', '.txt'])
+    await rag.setup_retrieval_chain(k=5)
+    answer, context = await rag.ask("什麼是演算法？")
+    print(f"回答: {answer}")
+    
+    # 方法 2: 一次性調用（推薦）
+    answer, context = await rag.ask("什麼是資料結構？", auto_setup=True)
+    print(f"回答: {answer}")
+
+
+# 如果你需要在同步環境中使用，可以這樣包裝：
+import asyncio
+
+def sync_ask(rag_helper, query):
+    """同步版本的詢問函數"""
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        # 如果在 Jupyter notebook 或其他異步環境中
+        import nest_asyncio
+        nest_asyncio.apply()
+    
+    return asyncio.run(rag_helper.ask(query))
+
+
+# 同步使用範例
+def sync_example():
+    rag = RAGHelper(pdf_folder="./documents")
+    answer, context = sync_ask(rag, "什麼是資料庫？")
+    print(f"回答: {answer}")
