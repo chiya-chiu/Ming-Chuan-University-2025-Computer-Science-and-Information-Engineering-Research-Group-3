@@ -36,3 +36,4 @@ python-jose[cryptography]>=3.3.0
 jinja2
 
 PyMuPDF
+nest_asyncio
