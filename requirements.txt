@@ -36,3 +36,4 @@ jinja2
 
 PyMuPDF
 nest_asyncio
+faiss-cpu
