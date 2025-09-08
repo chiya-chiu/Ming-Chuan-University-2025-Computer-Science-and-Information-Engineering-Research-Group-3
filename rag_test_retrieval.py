@@ -49,7 +49,7 @@ class RAGTester:
             await self.rag_helper.load_and_prepare(['.pdf', '.txt', '.docx', '.md', '.csv'])
 
             # 設定檢索鏈
-            print("🔗 設定檢索鏈...")
+            #print("🔗 設定檢索鏈...")
             self.rag_helper.setup_retrieval_chain()
 
             # 載入圖表資訊
@@ -88,7 +88,7 @@ class RAGTester:
             similarity_threshold (float): 相似度門檻 (0.0-1.0)，低於此值的結果會被過濾
 
         Returns:
-            list: 過濾後的文件列表，格式為 [(doc, similarity, weight), ...]
+            list: 過濾後的文件列表，格式為 [doc, doc, ...] (只返回文檔對象)
         """
         if not self.rag_helper:
             print("❌ RAG 系統未初始化")
@@ -101,7 +101,7 @@ class RAGTester:
             )
 
             # 根據相似度門檻過濾
-            filtered_docs_with_scores = []
+            filtered_docs = []
             print(f"🔍 檢索到 {len(docs_with_scores)} 個結果，應用相似度門檻 {similarity_threshold}")
 
             for doc, score in docs_with_scores:
@@ -110,52 +110,23 @@ class RAGTester:
                 print(f"📄 相似度: {similarity:.4f}, 原始分數: {score:.4f}")
 
                 if similarity >= similarity_threshold:
-                    filtered_docs_with_scores.append((doc, similarity))
+                    filtered_docs.append(doc)  # 只添加文檔對象
                     print(f"   ✅ 通過門檻，保留此文件")
                 else:
-                    #filtered_docs_with_scores.append((doc, similarity))
                     print(f"   ❌ 低於門檻 {similarity_threshold}，過濾此文件")
 
-            if not filtered_docs_with_scores:
+            if not filtered_docs:
                 print(f"⚠️ 沒有文件通過相似度門檻 {similarity_threshold}")
                 return []
 
-            # 計算權重（現在傳入正確的格式）
-            weighted_docs = self._calculate_weights(filtered_docs_with_scores)
-
             # 打印結果
-            print(f"📊 過濾後保留 {len(weighted_docs)} 個文件")
+            print(f"📊 過濾後保留 {len(filtered_docs)} 個文件")
 
-            #for i, (doc, similarity, weight) in enumerate(weighted_docs):
-            #    print(f"   {i + 1}. 相似度: {similarity:.4f}, 權重: {weight:.2%}")
-            return weighted_docs
+            return filtered_docs
 
         except Exception as e:
             print(f"❌ 檢索失敗：{str(e)}")
             return []
-
-    def _calculate_weights(self, docs_with_scores):
-        """
-        計算權重，並直接修改 doc.page_content 在前面加上「重要性 XX%」
-        Args:
-            docs_with_scores (list): [(doc, similarity), ...]
-
-        Returns:
-            list: [(doc, similarity, weight), ...]
-        """
-        if not docs_with_scores:
-            return []
-
-        weighted_docs = []
-        for i,(doc,sim) in enumerate(docs_with_scores):
-            #weight =  sim  / total_similarity
-
-            # ✅ 直接修改 doc.page_content
-            doc.page_content = f"重要性第 {i + 1}名 {doc.page_content}"
-
-            weighted_docs.append(doc)
-
-        return weighted_docs
 
     def _filter_by_manual_similarity(self, query, docs, threshold):
         """

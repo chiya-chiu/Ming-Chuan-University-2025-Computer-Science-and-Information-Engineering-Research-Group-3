@@ -396,7 +396,7 @@
             sendBtn.disabled = true;
             sendBtn.textContent = '思考中...';
             questionInput.disabled = true;
-
+            scrollToBottom();
             try {
                 const response = await fetch('/ask', {
                     method: 'POST',

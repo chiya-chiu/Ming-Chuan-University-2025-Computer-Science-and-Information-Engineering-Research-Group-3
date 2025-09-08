@@ -96,7 +96,7 @@ class RAGHelper:
             )
             formatted_docs.append(formatted_doc)
 
-        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+        embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
         self.vectorstore = FAISS.from_documents(formatted_docs, embeddings)
 
     def retrieve_documents(self, query, k=5, similarity_threshold=0.7):
@@ -136,59 +136,16 @@ class RAGHelper:
                 similarity = 1 / (1 + score)  # 轉換公式，讓分數越高表示越相似
                 # 直接使用距離分數進行比較（分數越低越相似）
                 if similarity >= similarity_threshold:
-                    filtered_docs.append((doc, similarity))
+                    filtered_docs.append(doc)
                     #print(f"   ✅ 通過門檻，保留此文件")
                 #else:
                     #print(f"   ❌ 高於門檻 {similarity_threshold}，過濾此文件")
 
-            #print(f"📊 過濾結果：{len(docs_with_scores)} -> {len(filtered_docs)} 個文件")
-
-            weighted_docs = self._calculate_weights(filtered_docs)
-            return weighted_docs
+            return filtered_docs
 
         except Exception as e:
             print(f"❌ 檢索過程中發生錯誤: {e}")
             return []
-
-    def _calculate_weights(self, docs_with_scores):
-        """
-        計算權重，並直接修改 doc.page_content 在前面加上「重要性 XX%」
-        Args:
-            docs_with_scores (list): [(doc, similarity), ...]
-
-        Returns:
-            list: [(doc, similarity, weight), ...]
-        """
-        if not docs_with_scores:
-            return []
-
-        weighted_docs = []
-        for i, (doc, sim) in enumerate(docs_with_scores):
-            # weight =  sim  / total_similarity
-
-            # ✅ 直接修改 doc.page_content
-            doc.page_content = f"重要性第 {i + 1}名 {doc.page_content}"
-
-            weighted_docs.append(doc)
-
-        return weighted_docs
-
-    def get_retriever_with_threshold(self, k=5, similarity_threshold=0.7):
-        """
-        創建一個帶有相似度門檻的自定義檢索器
-
-        Args:
-            k (int): 檢索數量
-            similarity_threshold (float): 相似度門檻
-
-        Returns:
-            callable: 檢索函數
-        """
-
-        def custom_retriever(query):
-            return self.retrieve_documents(query, k, similarity_threshold)
-
-        return custom_retriever
 
     async def load_and_prepare(self, file_extensions=None):
         print("開始載入檔案...")
@@ -197,7 +154,7 @@ class RAGHelper:
             print("已偵測到現有向量資料庫，直接載入...")
             self.vectorstore = FAISS.load_local(
                 "my_faiss_index",
-                OpenAIEmbeddings(model="text-embedding-3-small"),
+                OpenAIEmbeddings(model="text-embedding-3-large"),
                 allow_dangerous_deserialization=True
             )
 
@@ -304,12 +261,11 @@ class RAGHelper:
 
         # 創建提示詞模板
         system_prompt = (
-            "你是一個基於 RAG 系統的計算機概論家教。請參考提供的內容來回答問題。"
-            "如果問題和計算機概論無關，不要回答問題，告訴使用者問計算機概論相關問題"
-            "如果不知道如何回答問題或是問題沒意義，請提醒輸入更多資訊。"  
-            "用詞上請多使用正向鼓勵的詞語，並基於現有問題延伸出更多相關的問題。"
-            "請針對問題舉出簡單好懂的比喻或例子。"
-            "使用 LaTeX 時，請使用 $ 符號作為塊級公式"
+            "你是一個基於 RAG 系統的計算機概論家教。請參考提供的內容來回答問題。\n"
+            "如果問題和計算機概論無關，不要回答問題。\n"
+            "如果問題和計算機概論有關，用詞上多使用正向鼓勵詞語，並基於現有問題延伸出相關的問題，針對問題舉出簡單好懂的比喻或例子。若問題和計算機概論無關則不要延伸問題和舉例\n。"
+            "如果不知道如何回答問題或是問題沒意義，請提醒輸入更多資訊。\n"  
+            "使用 LaTeX 時，請使用 $ 符號作為塊級公式。\n"
             "請用繁體中文回答。\n\n"
             "{context}"
         )
