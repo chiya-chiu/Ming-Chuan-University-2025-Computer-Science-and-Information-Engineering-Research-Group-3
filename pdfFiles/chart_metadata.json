@@ -1,0 +1,792 @@
+{
+  "計概第一章.pdf_chart_1": {
+    "chart_id": "計概第一章.pdf_chart_1",
+    "chart_type": "figure",
+    "chart_number": "1.1",
+    "original_caption": "中國的算盤",
+    "generated_description": "這是一個圖表，展示了中國的算盤。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 2,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_2": {
+    "chart_id": "計概第一章.pdf_chart_2",
+    "chart_type": "figure",
+    "chart_number": "1.2",
+    "original_caption": "IBM的Logo",
+    "generated_description": "這是一個圖表，展示了IBM的Logo。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 2,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_3": {
+    "chart_id": "計概第一章.pdf_chart_3",
+    "chart_type": "figure",
+    "chart_number": "1.3",
+    "original_caption": "IEEE是最重要的電機電子工程師學會",
+    "generated_description": "這是一個圖表，展示了IEEE是最重要的電機電子工程師學會。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 3,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_4": {
+    "chart_id": "計概第一章.pdf_chart_4",
+    "chart_type": "figure",
+    "chart_number": "1.4",
+    "original_caption": "John V. Atanasoff (左)、他的助理Clifford Berry(中)及ABC(右)",
+    "generated_description": "這是一個圖表，展示了John V. Atanasoff (左)、他的助理Clifford Berry(中)及ABC(右)。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 4,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_5": {
+    "chart_id": "計概第一章.pdf_chart_5",
+    "chart_type": "figure",
+    "chart_number": "1.5",
+    "original_caption": "ENIAC",
+    "generated_description": "這是一個圖表，展示了ENIAC。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 4,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_6": {
+    "chart_id": "計概第一章.pdf_chart_6",
+    "chart_type": "figure",
+    "chart_number": "1.6",
+    "original_caption": "Grace Hopper 是",
+    "generated_description": "這是一個圖表，展示了Grace Hopper 是。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 6,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_7": {
+    "chart_id": "計概第一章.pdf_chart_7",
+    "chart_type": "figure",
+    "chart_number": "1.8",
+    "original_caption": ") 。現在逐漸流行的無",
+    "generated_description": "這是一個圖表，展示了) 。現在逐漸流行的無。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 7,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_8": {
+    "chart_id": "計概第一章.pdf_chart_8",
+    "chart_type": "figure",
+    "chart_number": "1.8",
+    "original_caption": "真的粉像老鼠吧",
+    "generated_description": "這是一個圖表，展示了真的粉像老鼠吧。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 7,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_9": {
+    "chart_id": "計概第一章.pdf_chart_9",
+    "chart_type": "table",
+    "chart_number": "1.1",
+    "original_caption": "列了前幾代電腦的基礎元件。",
+    "generated_description": "這是一個圖表，展示了列了前幾代電腦的基礎元件。。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 8,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_10": {
+    "chart_id": "計概第一章.pdf_chart_10",
+    "chart_type": "table",
+    "chart_number": "1.1",
+    "original_caption": "第一代電腦到第四代電腦",
+    "generated_description": "這是一個圖表，展示了第一代電腦到第四代電腦。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 8,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_11": {
+    "chart_id": "計概第一章.pdf_chart_11",
+    "chart_type": "figure",
+    "chart_number": "1.10",
+    "original_caption": "Intel",
+    "generated_description": "這是一個圖表，展示了Intel。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 8,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_12": {
+    "chart_id": "計概第一章.pdf_chart_12",
+    "chart_type": "figure",
+    "chart_number": "1.11",
+    "original_caption": ")。這一年，IBM製出第一部雷射",
+    "generated_description": "這是一個圖表，展示了)。這一年，IBM製出第一部雷射。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 9,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_13": {
+    "chart_id": "計概第一章.pdf_chart_13",
+    "chart_type": "figure",
+    "chart_number": "1.11",
+    "original_caption": "Altair",
+    "generated_description": "這是一個圖表，展示了Altair。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 9,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_14": {
+    "chart_id": "計概第一章.pdf_chart_14",
+    "chart_type": "figure",
+    "chart_number": "1.12",
+    "original_caption": "Apple II應可算是第",
+    "generated_description": "這是一個圖表，展示了Apple II應可算是第。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 9,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_15": {
+    "chart_id": "計概第一章.pdf_chart_15",
+    "chart_type": "figure",
+    "chart_number": "1.13",
+    "original_caption": ")以電腦作為年度風雲人物。這一",
+    "generated_description": "這是一個圖表，展示了)以電腦作為年度風雲人物。這一。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 9,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_16": {
+    "chart_id": "計概第一章.pdf_chart_16",
+    "chart_type": "figure",
+    "chart_number": "1.14",
+    "original_caption": ") 提出全球資訊網 ( World Wide Web；WWW)的構想，當初目的",
+    "generated_description": "這是一個圖表，展示了) 提出全球資訊網 ( World Wide Web；WWW)的構想，當初目的。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 10,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_17": {
+    "chart_id": "計概第一章.pdf_chart_17",
+    "chart_type": "figure",
+    "chart_number": "1.14",
+    "original_caption": "全球資訊網發明人 Tim Berners-Lee 改變了世界",
+    "generated_description": "這是一個圖表，展示了全球資訊網發明人 Tim Berners-Lee 改變了世界。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 10,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_18": {
+    "chart_id": "計概第一章.pdf_chart_18",
+    "chart_type": "figure",
+    "chart_number": "1.15",
+    "original_caption": ") 領軍的團隊推出了跨平台的 JAVA 程式語言，",
+    "generated_description": "這是一個圖表，展示了) 領軍的團隊推出了跨平台的 JAVA 程式語言，。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_19": {
+    "chart_id": "計概第一章.pdf_chart_19",
+    "chart_type": "figure",
+    "chart_number": "1.15",
+    "original_caption": "James Gosling 領軍",
+    "generated_description": "這是一個圖表，展示了James Gosling 領軍。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_20": {
+    "chart_id": "計概第一章.pdf_chart_20",
+    "chart_type": "figure",
+    "chart_number": "1.16",
+    "original_caption": "Windows",
+    "generated_description": "這是一個圖表，展示了Windows。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_21": {
+    "chart_id": "計概第一章.pdf_chart_21",
+    "chart_type": "figure",
+    "chart_number": "1.17",
+    "original_caption": "Google",
+    "generated_description": "這是一個圖表，展示了Google。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_22": {
+    "chart_id": "計概第一章.pdf_chart_22",
+    "chart_type": "figure",
+    "chart_number": "1.18",
+    "original_caption": ")，無線網路、省電技術",
+    "generated_description": "這是一個圖表，展示了)，無線網路、省電技術。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 12,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_23": {
+    "chart_id": "計概第一章.pdf_chart_23",
+    "chart_type": "figure",
+    "chart_number": "1.18",
+    "original_caption": "Intel Centrino 行動運算技術平台: 無線網路、省電技術及較小體積",
+    "generated_description": "這是一個圖表，展示了Intel Centrino 行動運算技術平台: 無線網路、省電技術及較小體積。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 12,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_24": {
+    "chart_id": "計概第一章.pdf_chart_24",
+    "chart_type": "figure",
+    "chart_number": "1.19",
+    "original_caption": "Google Earth 讓使用者遨遊於天地之間 ，本影像為台大校園的衛星",
+    "generated_description": "這是一個圖表，展示了Google Earth 讓使用者遨遊於天地之間 ，本影像為台大校園的衛星。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 13,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_25": {
+    "chart_id": "計概第一章.pdf_chart_25",
+    "chart_type": "figure",
+    "chart_number": "1.21",
+    "original_caption": ")，和 Apple 的 iPhone 互別苗頭。",
+    "generated_description": "這是一個圖表，展示了)，和 Apple 的 iPhone 互別苗頭。。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_26": {
+    "chart_id": "計概第一章.pdf_chart_26",
+    "chart_type": "figure",
+    "chart_number": "1.21",
+    "original_caption": "Google 所推出的 GPhone",
+    "generated_description": "這是一個圖表，展示了Google 所推出的 GPhone。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_27": {
+    "chart_id": "計概第一章.pdf_chart_27",
+    "chart_type": "figure",
+    "chart_number": "1.23",
+    "original_caption": "微網誌的代",
+    "generated_description": "這是一個圖表，展示了微網誌的代。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_28": {
+    "chart_id": "計概第一章.pdf_chart_28",
+    "chart_type": "figure",
+    "chart_number": "1.24",
+    "original_caption": "在台灣頗受歡迎的「噗 浪」",
+    "generated_description": "這是一個圖表，展示了在台灣頗受歡迎的「噗 浪」。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第一章.pdf_chart_29": {
+    "chart_id": "計概第一章.pdf_chart_29",
+    "chart_type": "figure",
+    "chart_number": "1.28",
+    "original_caption": "顯示這蠍子系統之間的關聯性。",
+    "generated_description": "這是一個圖表，展示了顯示這蠍子系統之間的關聯性。。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 18,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第一章.pdf"
+  },
+  "計概第三章.pdf_chart_1": {
+    "chart_id": "計概第三章.pdf_chart_1",
+    "chart_type": "figure",
+    "chart_number": "3.1",
+    "original_caption": "電腦基礎元件由真空管、電晶體、積體電路到超大型積體電路",
+    "generated_description": "這是一個圖表，展示了電腦基礎元件由真空管、電晶體、積體電路到超大型積體電路。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 2,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_2": {
+    "chart_id": "計概第三章.pdf_chart_2",
+    "chart_type": "figure",
+    "chart_number": "3.2",
+    "original_caption": "桌上型電腦的造型日新月異",
+    "generated_description": "這是一個圖表，展示了桌上型電腦的造型日新月異。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 3,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_3": {
+    "chart_id": "計概第三章.pdf_chart_3",
+    "chart_type": "figure",
+    "chart_number": "3.3",
+    "original_caption": ")，第三波革命 ( 資訊革命；第一波是農業革命，第二波是工業革命 ) 已展開全面性",
+    "generated_description": "這是一個圖表，展示了)，第三波革命 ( 資訊革命；第一波是農業革命，第二波是工業革命 ) 已展開全面性。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 3,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_4": {
+    "chart_id": "計概第三章.pdf_chart_4",
+    "chart_type": "figure",
+    "chart_number": "3.3",
+    "original_caption": "筆記型電腦及平板電腦的發展一日千里",
+    "generated_description": "這是一個圖表，展示了筆記型電腦及平板電腦的發展一日千里。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 3,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_5": {
+    "chart_id": "計概第三章.pdf_chart_5",
+    "chart_type": "figure",
+    "chart_number": "3.4",
+    "original_caption": "中央處理器和記憶體的連結架構",
+    "generated_description": "這是一個圖表，展示了中央處理器和記憶體的連結架構。從圖中可以看出相關的資訊和數據關係，有助於理解計算機科學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 4,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_6": {
+    "chart_id": "計概第三章.pdf_chart_6",
+    "chart_type": "figure",
+    "chart_number": "3.5",
+    "original_caption": "AND、OR、XOR及NOT等邏輯運算",
+    "generated_description": "這是一個圖表，展示了AND、OR、XOR及NOT等邏輯運算。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 4,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_7": {
+    "chart_id": "計概第三章.pdf_chart_7",
+    "chart_type": "table",
+    "chart_number": "3.1",
+    "original_caption": "微處理器發展簡史",
+    "generated_description": "這是一個圖表，展示了微處理器發展簡史。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 5,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_8": {
+    "chart_id": "計概第三章.pdf_chart_8",
+    "chart_type": "figure",
+    "chart_number": "3.6",
+    "original_caption": "記憶體的容量、速度與價位",
+    "generated_description": "這是一個圖表，展示了記憶體的容量、速度與價位。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 6,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_9": {
+    "chart_id": "計概第三章.pdf_chart_9",
+    "chart_type": "figure",
+    "chart_number": "3.7",
+    "original_caption": "中，我們每個位置",
+    "generated_description": "這是一個圖表，展示了中，我們每個位置。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 6,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_10": {
+    "chart_id": "計概第三章.pdf_chart_10",
+    "chart_type": "figure",
+    "chart_number": "3.8",
+    "original_caption": "CPU 執行程式的流程",
+    "generated_description": "這是一個圖表，展示了CPU 執行程式的流程。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 8,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_11": {
+    "chart_id": "計概第三章.pdf_chart_11",
+    "chart_type": "figure",
+    "chart_number": "3.9",
+    "original_caption": "CPU 執行時採用生產線技術",
+    "generated_description": "這是一個圖表，展示了CPU 執行時採用生產線技術。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 8,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_12": {
+    "chart_id": "計概第三章.pdf_chart_12",
+    "chart_type": "figure",
+    "chart_number": "3.10",
+    "original_caption": "周邊設備很容易就可連上主機，必要時再加裝介面卡",
+    "generated_description": "這是一個圖表，展示了周邊設備很容易就可連上主機，必要時再加裝介面卡。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 10,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_13": {
+    "chart_id": "計概第三章.pdf_chart_13",
+    "chart_type": "figure",
+    "chart_number": "3.11",
+    "original_caption": "傳統鍵盤與無線鍵盤",
+    "generated_description": "這是一個圖表，展示了傳統鍵盤與無線鍵盤。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 10,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_14": {
+    "chart_id": "計概第三章.pdf_chart_14",
+    "chart_type": "figure",
+    "chart_number": "3.12",
+    "original_caption": "古董級的滑鼠還得三不五時把滑",
+    "generated_description": "這是一個圖表，展示了古董級的滑鼠還得三不五時把滑。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 10,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_15": {
+    "chart_id": "計概第三章.pdf_chart_15",
+    "chart_type": "figure",
+    "chart_number": "3.13",
+    "original_caption": "光學式滑鼠",
+    "generated_description": "這是一個圖表，展示了光學式滑鼠。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_16": {
+    "chart_id": "計概第三章.pdf_chart_16",
+    "chart_type": "figure",
+    "chart_number": "3.14",
+    "original_caption": ") 就像影印機可以複製文",
+    "generated_description": "這是一個圖表，展示了) 就像影印機可以複製文。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_17": {
+    "chart_id": "計概第三章.pdf_chart_17",
+    "chart_type": "figure",
+    "chart_number": "3.14",
+    "original_caption": "平台式掃描器",
+    "generated_description": "這是一個圖表，展示了平台式掃描器。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_18": {
+    "chart_id": "計概第三章.pdf_chart_18",
+    "chart_type": "figure",
+    "chart_number": "3.15",
+    "original_caption": "液晶螢幕已成為主流",
+    "generated_description": "這是一個圖表，展示了液晶螢幕已成為主流。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 11,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_19": {
+    "chart_id": "計概第三章.pdf_chart_19",
+    "chart_type": "figure",
+    "chart_number": "3.16",
+    "original_caption": ")，真是「一兼二顧，摸蛤兼洗褲」啊 !",
+    "generated_description": "這是一個圖表，展示了)，真是「一兼二顧，摸蛤兼洗褲」啊 !。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 12,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_20": {
+    "chart_id": "計概第三章.pdf_chart_20",
+    "chart_type": "figure",
+    "chart_number": "3.17",
+    "original_caption": "硬碟的內部結構",
+    "generated_description": "這是一個圖表，展示了硬碟的內部結構。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 12,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_21": {
+    "chart_id": "計概第三章.pdf_chart_21",
+    "chart_type": "figure",
+    "chart_number": "3.18",
+    "original_caption": ")。DVD 單面單層可",
+    "generated_description": "這是一個圖表，展示了)。DVD 單面單層可。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 13,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_22": {
+    "chart_id": "計概第三章.pdf_chart_22",
+    "chart_type": "figure",
+    "chart_number": "3.18",
+    "original_caption": "DVD光碟機曾是很重要的輔助儲存裝置",
+    "generated_description": "這是一個圖表，展示了DVD光碟機曾是很重要的輔助儲存裝置。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 13,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_23": {
+    "chart_id": "計概第三章.pdf_chart_23",
+    "chart_type": "figure",
+    "chart_number": "3.19",
+    "original_caption": "各式各樣的記憶卡",
+    "generated_description": "這是一個圖表，展示了各式各樣的記憶卡。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 13,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_24": {
+    "chart_id": "計概第三章.pdf_chart_24",
+    "chart_type": "figure",
+    "chart_number": "3.20",
+    "original_caption": "讀卡機 ( 資料來源：SanDisk )",
+    "generated_description": "這是一個圖表，展示了讀卡機 ( 資料來源。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_25": {
+    "chart_id": "計概第三章.pdf_chart_25",
+    "chart_type": "figure",
+    "chart_number": "3.21",
+    "original_caption": ")，令人讚嘆。",
+    "generated_description": "這是一個圖表，展示了)，令人讚嘆。。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_26": {
+    "chart_id": "計概第三章.pdf_chart_26",
+    "chart_type": "figure",
+    "chart_number": "3.21",
+    "original_caption": "隨身碟造型設計極具巧思 ( 資料來源：SanDisk )",
+    "generated_description": "這是一個圖表，展示了隨身碟造型設計極具巧思 ( 資料來源。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_27": {
+    "chart_id": "計概第三章.pdf_chart_27",
+    "chart_type": "figure",
+    "chart_number": "3.22",
+    "original_caption": "複合式隨身碟兼具錄音、MP",
+    "generated_description": "這是一個圖表，展示了複合式隨身碟兼具錄音、MP。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_28": {
+    "chart_id": "計概第三章.pdf_chart_28",
+    "chart_type": "figure",
+    "chart_number": "3.23",
+    "original_caption": ")，它是一",
+    "generated_description": "這是一個圖表，展示了)，它是一。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 15,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第三章.pdf_chart_29": {
+    "chart_id": "計概第三章.pdf_chart_29",
+    "chart_type": "figure",
+    "chart_number": "3.23",
+    "original_caption": "外接式硬碟 ( 資料來源 : 創見 )",
+    "generated_description": "這是一個圖表，展示了外接式硬碟 ( 資料來源 : 創見 )。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 15,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第三章.pdf"
+  },
+  "計概第二章.pdf_chart_1": {
+    "chart_id": "計概第二章.pdf_chart_1",
+    "chart_type": "figure",
+    "chart_number": "2.1",
+    "original_caption": "列了一到五個位元的各種組",
+    "generated_description": "這是一個圖表，展示了列了一到五個位元的各種組。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 2,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_2": {
+    "chart_id": "計概第二章.pdf_chart_2",
+    "chart_type": "figure",
+    "chart_number": "2.1",
+    "original_caption": "一到五個位元的各種組合",
+    "generated_description": "這是一個圖表，展示了一到五個位元的各種組合。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 2,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_3": {
+    "chart_id": "計概第二章.pdf_chart_3",
+    "chart_type": "figure",
+    "chart_number": "2.2",
+    "original_caption": "不同的資料型態都以位元字串儲存在腦裡",
+    "generated_description": "這是一個圖表，展示了不同的資料型態都以位元字串儲存在腦裡。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 3,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_4": {
+    "chart_id": "計概第二章.pdf_chart_4",
+    "chart_type": "table",
+    "chart_number": "2.1",
+    "original_caption": "十六進位的數字符號及其所對應的十進位及二進位",
+    "generated_description": "這是一個圖表，展示了十六進位的數字符號及其所對應的十進位及二進位。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 4,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_5": {
+    "chart_id": "計概第二章.pdf_chart_5",
+    "chart_type": "figure",
+    "chart_number": "2.6",
+    "original_caption": "，我們所得到的二進位數為",
+    "generated_description": "這是一個圖表，展示了，我們所得到的二進位數為。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 7,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_6": {
+    "chart_id": "計概第二章.pdf_chart_6",
+    "chart_type": "figure",
+    "chart_number": "2.7",
+    "original_caption": "二進位數換成十六進位數時，每四個位數合成一項",
+    "generated_description": "這是一個圖表，展示了二進位數換成十六進位數時，每四個位數合成一項。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 7,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_7": {
+    "chart_id": "計概第二章.pdf_chart_7",
+    "chart_type": "table",
+    "chart_number": "2.2",
+    "original_caption": "列了位元字串與十進位數的對應",
+    "generated_description": "這是一個圖表，展示了列了位元字串與十進位數的對應。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 9,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_8": {
+    "chart_id": "計概第二章.pdf_chart_8",
+    "chart_type": "figure",
+    "chart_number": "2.10",
+    "original_caption": "描繪這個轉換程序。",
+    "generated_description": "這是一個圖表，展示了描繪這個轉換程序。。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 10,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_9": {
+    "chart_id": "計概第二章.pdf_chart_9",
+    "chart_type": "figure",
+    "chart_number": "2.11",
+    "original_caption": "列了二補數",
+    "generated_description": "這是一個圖表，展示了列了二補數。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 12,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_10": {
+    "chart_id": "計概第二章.pdf_chart_10",
+    "chart_type": "figure",
+    "chart_number": "2.11",
+    "original_caption": "八位元二補數",
+    "generated_description": "這是一個圖表，展示了八位元二補數。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 13,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_11": {
+    "chart_id": "計概第二章.pdf_chart_11",
+    "chart_type": "figure",
+    "chart_number": "2.12",
+    "original_caption": "為兩個正數相加的過程。",
+    "generated_description": "這是一個圖表，展示了為兩個正數相加的過程。。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 13,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_12": {
+    "chart_id": "計概第二章.pdf_chart_12",
+    "chart_type": "figure",
+    "chart_number": "2.13",
+    "original_caption": "是一個正數加上一個負數，且結果為正的例子。在這過程中，最左邊的位元相加有進",
+    "generated_description": "這是一個圖表，展示了是一個正數加上一個負數，且結果為正的例子。在這過程中，最左邊的位元相加有進。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_13": {
+    "chart_id": "計概第二章.pdf_chart_13",
+    "chart_type": "figure",
+    "chart_number": "2.14",
+    "original_caption": "是一個正數加上一個負數，且結果為負的例子。在這過程中，最左邊的位元相加並沒",
+    "generated_description": "這是一個圖表，展示了是一個正數加上一個負數，且結果為負的例子。在這過程中，最左邊的位元相加並沒。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_14": {
+    "chart_id": "計概第二章.pdf_chart_14",
+    "chart_type": "figure",
+    "chart_number": "2.15",
+    "original_caption": "是兩個負數相加。在這過程中，最左邊的位元相加有進位，我們對那個進位忽略不",
+    "generated_description": "這是一個圖表，展示了是兩個負數相加。在這過程中，最左邊的位元相加有進位，我們對那個進位忽略不。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 14,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_15": {
+    "chart_id": "計概第二章.pdf_chart_15",
+    "chart_type": "figure",
+    "chart_number": "2.16",
+    "original_caption": "是兩個正數相加超過儲存範圍的例子，我們稱之為溢位(overflow)。在這過程中，最左",
+    "generated_description": "這是一個圖表，展示了是兩個正數相加超過儲存範圍的例子，我們稱之為溢位(overflow)。在這過程中，最左。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 15,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_16": {
+    "chart_id": "計概第二章.pdf_chart_16",
+    "chart_type": "figure",
+    "chart_number": "2.17",
+    "original_caption": "是兩個負數相加超過儲存範圍的例子，我們稱之為溢位(overflow)。在這過程中，最左",
+    "generated_description": "這是一個圖表，展示了是兩個負數相加超過儲存範圍的例子，我們稱之為溢位(overflow)。在這過程中，最左。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 15,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_17": {
+    "chart_id": "計概第二章.pdf_chart_17",
+    "chart_type": "figure",
+    "chart_number": "2.18",
+    "original_caption": "描繪了這個相減的過程，當",
+    "generated_description": "這是一個圖表，展示了描繪了這個相減的過程，當。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 16,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_18": {
+    "chart_id": "計概第二章.pdf_chart_18",
+    "chart_type": "figure",
+    "chart_number": "2.19",
+    "original_caption": "列了單倍精準數 ( single precision；",
+    "generated_description": "這是一個圖表，展示了列了單倍精準數 ( single precision；。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 17,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_19": {
+    "chart_id": "計概第二章.pdf_chart_19",
+    "chart_type": "table",
+    "chart_number": "2.4",
+    "original_caption": "列了 ASCII 基本的符號對照",
+    "generated_description": "這是一個圖表，展示了列了 ASCII 基本的符號對照。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 18,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_20": {
+    "chart_id": "計概第二章.pdf_chart_20",
+    "chart_type": "table",
+    "chart_number": "2.4",
+    "original_caption": "ASCII 符號對照",
+    "generated_description": "這是一個圖表，展示了ASCII 符號對照。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 19,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  },
+  "計概第二章.pdf_chart_21": {
+    "chart_id": "計概第二章.pdf_chart_21",
+    "chart_type": "table",
+    "chart_number": "2.5",
+    "original_caption": "Unicode 符號對照",
+    "generated_description": "這是一個圖表，展示了Unicode 符號對照。從圖中可以看出相關的資訊和數據關係，有助於理解統計學的概念。這個圖表在文件中起到了重要的說明作用。",
+    "page_number": 20,
+    "confidence_score": 0.7000000000000001,
+    "source_file": "計概第二章.pdf"
+  }
+}
