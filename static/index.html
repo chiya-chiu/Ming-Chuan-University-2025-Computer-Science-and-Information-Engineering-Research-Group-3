@@ -110,7 +110,7 @@
                         <textarea 
                             class="question-input" 
                             id="questionInput" 
-                            placeholder="請輸入您的問題..."
+                            placeholder="系統初始化中，請耐心等待~"
                             rows="1"
                             disabled
                             onkeydown="handleKeyDown(event)"
@@ -166,6 +166,7 @@
                 if (user.is_admin) {
                     loadAdminStats(); // 如果是管理員，顯示管理統計
                 }
+                document.getElementById('questionInput').placeholder = '請輸入您的問題...';
             } else {
                 showAuthSection();  // 否則顯示登入/註冊畫面
                 document.body.className = 'auth-mode';
@@ -303,6 +304,7 @@
                     document.getElementById('questionInput').disabled = false;
                     document.getElementById('sendBtn').disabled = false;
                     document.getElementById('questionInput').focus();
+                    document.getElementById('questionInput').placeholder = '請輸入您的問題...';
                     // 隱藏歡迎訊息
                     document.getElementById('welcomeMessage').style.display = 'none';
                 } else {
