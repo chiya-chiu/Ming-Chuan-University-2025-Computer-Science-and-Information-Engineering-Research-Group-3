@@ -14,6 +14,11 @@ from pydantic import PrivateAttr
 from langchain.schema import BaseRetriever, Document
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from typing import List
+import pickle
+import json
+import hashlib
+from datetime import datetime
+import numpy as np
 
 # 可以讀取不同的檔案格式
 from langchain_community.document_loaders import (
@@ -40,7 +45,10 @@ class RAGHelper:
         self.splitter_instance.CENTER_ONLY = False  # 不要求標題居中
         self.splitter_instance.NUMBERED_HEADERS_ONLY = False  # 不要求標題有編號
         self.splitter_instance.SMART_CONSOLIDATE = True  # 啟用智能合併
-
+        self.cache_dir = "rag_cache"
+        os.makedirs(self.cache_dir, exist_ok=True)
+        self.is_loaded = False
+    
     def get_loader(self, path: str):
         ext = Path(path).suffix.lower()
         if ext == ".pdf":
