@@ -157,7 +157,10 @@ class RAGHelper:
 
     async def load_and_prepare(self, file_extensions=None):
         print("開始載入檔案...")
-
+        if not force_refresh and self._is_cache_valid() and self._load_from_cache():
+        self.is_loaded = True
+        print("從缓存加載完成！")
+        return
         if os.path.exists("my_faiss_index"):  # 如果本地有向量資料庫，載入本地的向量資料庫
             print("已偵測到現有向量資料庫，直接載入...")
             self.vectorstore = FAISS.load_local(
@@ -216,7 +219,9 @@ class RAGHelper:
 
             self._build_vectorstore(all_chunks)  # 將文字轉成向量，並建立向量資料庫
             self.vectorstore.save_local("my_faiss_index")  # 將向量資料庫存到本地
-
+            self._save_to_cache()
+            self.is_loaded = True
+            
     def setup_retrieval_chain(self, k=5, similarity_threshold=None):
         """
         設置檢索鏈
