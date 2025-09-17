@@ -16,6 +16,11 @@ from langchain.memory import ConversationBufferWindowMemory, ConversationSummary
 from langchain.schema import BaseRetriever, Document, AIMessage, HumanMessage
 from langchain.callbacks.manager import CallbackManagerForRetrieverRun
 from pydantic import PrivateAttr
+import pickle
+import json
+import hashlib
+from datetime import datetime
+import numpy as np
 
 # 可以讀取不同的檔案格式
 from langchain_community.document_loaders import (
