@@ -221,6 +221,139 @@ class RAGHelper:
             self.vectorstore.save_local("my_faiss_index")  # 將向量資料庫存到本地
             self._save_to_cache()
             self.is_loaded = True
+
+    def _get_file_hash(self, file_path: str) -> str:
+    """計算檔案的 MD5 雜湊值"""
+    hash_md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+def _get_cache_file_path(self, cache_type: str) -> str:
+    """取得緩存檔案路徑"""
+    return os.path.join(self.cache_dir, f"rag_{cache_type}")
+
+def _get_current_file_hashes(self) -> dict:
+    """取得目前所有檔案的雜湊值"""
+    file_hashes = {}
+    
+    # 檢查 PDF 檔案夾中的所有檔案
+    if os.path.exists(self.pdf_folder):
+        for file in os.listdir(self.pdf_folder):
+            file_path = os.path.join(self.pdf_folder, file)
+            if os.path.isfile(file_path):
+                file_hashes[file] = self._get_file_hash(file_path)
+    
+    return file_hashes
+
+def _save_cache_metadata(self):
+    """儲存緩存元數據"""
+    metadata = {
+        'file_hashes': self._get_current_file_hashes(),
+        'cached_time': datetime.now().isoformat(),
+        'pdf_folder': self.pdf_folder,
+        'chunk_size': self.chunk_size,
+        'chunk_overlap': self.chunk_overlap,
+        'pdf_target_len': self.pdf_target_len,
+        'pdf_tolerance': self.pdf_tolerance
+    }
+    
+    with open(self._get_cache_file_path('metadata.json'), 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+def _load_cache_metadata(self):
+    """載入緩存元數據"""
+    metadata_path = self._get_cache_file_path('metadata.json')
+    if not os.path.exists(metadata_path):
+        return None
+    
+    try:
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except:
+        return None
+
+def _is_cache_valid(self) -> bool:
+    """檢查緩存是否有效"""
+    metadata = self._load_cache_metadata()
+    if not metadata:
+        return False
+    
+    # 檢查緩存檔案是否存在
+    if not os.path.exists(self._get_cache_file_path('vectorstore')):
+        return False
+    
+    # 檢查參數是否符合
+    if (metadata.get('chunk_size') != self.chunk_size or
+        metadata.get('chunk_overlap') != self.chunk_overlap or
+        metadata.get('pdf_target_len') != self.pdf_target_len or
+        metadata.get('pdf_tolerance') != self.pdf_tolerance or
+        metadata.get('pdf_folder') != self.pdf_folder):
+        return False
+    
+    # 檢查檔案是否有異動
+    current_hashes = self._get_current_file_hashes()
+    cached_hashes = metadata.get('file_hashes', {})
+    
+    return current_hashes == cached_hashes
+
+def _save_to_cache(self):
+    """儲存資料到緩存"""
+    if self.vectorstore:
+        # 儲存向量資料庫
+        cache_vectorstore_path = self._get_cache_file_path('vectorstore')
+        self.vectorstore.save_local(cache_vectorstore_path)
+        
+        # 儲存元數據
+        self._save_cache_metadata()
+        
+        print("✅ 已儲存到緩存")
+
+def _load_from_cache(self) -> bool:
+    """從緩存載入資料"""
+    try:
+        # 載入向量資料庫
+        cache_vectorstore_path = self._get_cache_file_path('vectorstore')
+        if os.path.exists(cache_vectorstore_path):
+            self.vectorstore = FAISS.load_local(
+                cache_vectorstore_path,
+                OpenAIEmbeddings(model="text-embedding-3-large"),
+                allow_dangerous_deserialization=True
+            )
+            print("✅ 從緩存載入向量資料庫成功")
+            return True
+        else:
+            print("❌ 緩存的向量資料庫不存在")
+            return False
+        
+    except Exception as e:
+        print(f"❌ 載入緩存失敗: {e}")
+        return False
+
+def clear_cache(self):
+    """清除所有緩存"""
+    import shutil
+    
+    if os.path.exists(self.cache_dir):
+        shutil.rmtree(self.cache_dir)
+        print("✅ 已清除所有緩存")
+    
+    # 重新建立緩存目錄
+    os.makedirs(self.cache_dir, exist_ok=True)
+
+def get_cache_info(self) -> dict:
+    """取得緩存資訊"""
+    metadata = self._load_cache_metadata()
+    if not metadata:
+        return {'cached': False}
+    
+    return {
+        'cached': True,
+        'cached_time': metadata.get('cached_time'),
+        'file_count': len(metadata.get('file_hashes', {})),
+        'files': list(metadata.get('file_hashes', {}).keys())
+    }
             
     def setup_retrieval_chain(self, k=5, similarity_threshold=None):
         """
