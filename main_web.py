@@ -9,7 +9,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import List, Optional
-from RAG_Helper import RAGHelper
+#from RAG_Helper import RAGHelper
+from MultiTurnRAGHelper import MultiTurnRAGHelper
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -26,7 +27,7 @@ from pathlib import Path
 load_dotenv()   # 載入環境變數，像是 API 金鑰
 
 # 安全設定
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-this") # JWT 加密用
+SECRET_KEY = os.getenv("SECRET_KEY", "hifumi_daisuki") # JWT 加密用
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30    #token 30 分鐘內有效
 
@@ -143,7 +144,7 @@ app.add_middleware(
 )
 
 # 全域 RAG 實例
-rag_instance: Optional[RAGHelper] = None
+rag_instance: Optional[MultiTurnRAGHelper] = None
 
 # 安全相關
 security = HTTPBearer()
@@ -193,6 +194,19 @@ class ImageResponse(BaseModel):
     image_url: str
     image_name: str
     message: str
+
+# 新增多輪對話相關的資料模型
+class ConversationRequest(BaseModel):
+    question: str
+    conversation_id: Optional[str] = None  # 可選的對話 ID
+
+class ConversationResponse(BaseModel):
+    answer: str
+    sources: List[dict]
+    conversation_id: str
+
+class ConversationHistoryRequest(BaseModel):
+    conversation_id: str
 
 # 工具函數
 def hash_password(password: str) -> str:
@@ -355,7 +369,7 @@ async def get_current_user_info(current_user: str = Depends(get_current_user)):
 
 @app.post("/initialize")
 async def initialize_system(current_user: str = Depends(get_current_user)):
-    """初始化 RAG 系統"""
+    """初始化多輪對話 RAG 系統"""
     global rag_instance
 
     if not os.getenv("OPENAI_API_KEY"):
@@ -365,13 +379,19 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail="找不到 pdfFiles 資料夾")
 
     try:
-        rag_instance = RAGHelper(pdf_folder="./pdfFiles", chunk_size=300, chunk_overlap=50)
+        # 使用新的多輪對話 RAG 類別
+        rag_instance = MultiTurnRAGHelper(
+            pdf_folder="./pdfFiles",
+            chunk_size=300,
+            chunk_overlap=50,
+            memory_window=10  # 設定記憶窗口大小
+        )
         await rag_instance.load_and_prepare(['.pdf', '.txt', '.docx', '.md', '.csv'])
         rag_instance.setup_retrieval_chain(k=5, similarity_threshold=0.45)
 
         return StatusResponse(
             status="success",
-            message="RAG 系統初始化完成"
+            message="多輪對話 RAG 系統初始化完成"
         )
 
     except Exception as e:
@@ -381,63 +401,35 @@ async def initialize_system(current_user: str = Depends(get_current_user)):
 # 在 ask_question 函數中新增圖片測試邏輯
 @app.post("/ask", response_model=AnswerResponse)
 async def ask_question(request: QuestionRequest, current_user: str = Depends(get_current_user)):
-    """回答問題（需登入）"""
+    """原有的問答功能（無記憶，向後兼容）"""
     global rag_instance
-
-    """
-    # 檢查是否為圖片測試指令
-    if re.match(r'^\d+$', request.question.strip()):
-        try:
-            image_id = int(request.question.strip())
-            image_response = await get_test_image(image_id, current_user)
-
-            # 記錄問答
-            start_time = datetime.now()
-            response_time = (datetime.now() - start_time).total_seconds()
-            log_question(current_user, request.question, f"顯示圖片：{image_response.image_name}", 0, response_time)
-
-            return AnswerResponse(
-                answer=f"IMAGE:{image_response.image_url}|{image_response.message}",
-                sources=[]
-            )
-        except HTTPException as e:
-            return AnswerResponse(
-                answer=f"❌ {e.detail}",
-                sources=[]
-            )
-    """
 
     if not rag_instance:
         raise HTTPException(status_code=400, detail="系統尚未初始化")
 
-    # 原有的 RAG 問答邏輯...
     try:
         start_time = datetime.now()
+        # 使用原有的無記憶問答
         answer, sources = rag_instance.ask(request.question)
         response_time = (datetime.now() - start_time).total_seconds()
 
-        # 檢查是否有圖表內容並載入圖表資訊
+        # 其他邏輯保持不變...（圖表檢測等）
         chart_images = []
-        chart_info_file = Path("pdfFiles/chart_metadata.json")  # 調整為你的 JSON 檔案路徑
+        chart_info_file = Path("pdfFiles/chart_metadata.json")
 
         if chart_info_file.exists():
             try:
                 with open(chart_info_file, 'r', encoding='utf-8') as f:
                     chart_data = json.load(f)
 
-                # 檢查 Top 5 sources 中是否有包含 generated_description 的內容
-                for doc in sources[:5]:  # 只檢查前5個
+                for doc in sources[:5]:
                     source_content = doc.page_content.lower()
 
-                    # 遍歷所有圖表，檢查是否與檢索內容相關
                     for chart_id, chart_info in chart_data.items():
                         if 'generated_description' in chart_info:
-                            # 檢查是否相關
                             if is_chart_relevant(chart_info, source_content):
-                                # 構建圖片路徑
                                 image_path = f"static/charts/{chart_id}.jpg"
 
-                                # 只有圖片存在才加入
                                 if os.path.exists(image_path):
                                     chart_images.append({
                                         'chart_id': chart_id,
@@ -448,7 +440,6 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
                                         'chart_number': chart_info.get('chart_number', '')
                                     })
 
-                                    # 找到一個有效的圖片就跳出
                                     if len(chart_images) >= 1:
                                         break
 
@@ -458,7 +449,6 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
             except Exception as e:
                 print(f"載入圖表資訊時發生錯誤：{e}")
 
-        # 格式化來源資訊
         formatted_sources = []
         for doc in sources:
             source_info = {
@@ -468,18 +458,12 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
             }
             formatted_sources.append(source_info)
 
-        # 如果有相關圖表，將圖片資訊加入回應
         final_answer = answer
 
         if chart_images:
             chart_info_text = "\n\n相關圖表：\n"
-            """
-            for i, chart in enumerate(chart_images, 1):
-                chart_info_text += f"{i}. {chart['caption']} (圖 {chart['chart_number']})\n"
-             """
             final_answer = answer + chart_info_text + f"\nCHARTS:{json.dumps(chart_images, ensure_ascii=False)}"
 
-        # 記錄問答
         log_question(current_user, request.question, final_answer, len(sources), response_time)
 
         return AnswerResponse(answer=final_answer, sources=formatted_sources)
@@ -853,6 +837,183 @@ async def force_init_database():
             "status": "error",
             "message": f"資料庫初始化失敗：{str(e)}"
         }
+
+
+# 5. 新的多輪對話問答端點
+@app.post("/ask/conversation", response_model=ConversationResponse)
+async def ask_with_conversation(request: ConversationRequest, current_user: str = Depends(get_current_user)):
+    """多輪對話問答（支持上下文記憶）"""
+    global rag_instance
+
+    if not rag_instance:
+        raise HTTPException(status_code=400, detail="系統尚未初始化")
+
+    # 使用用戶 ID 作為對話 ID，或者使用提供的對話 ID
+    conversation_id = request.conversation_id or current_user
+
+    try:
+        start_time = datetime.now()
+        # 使用帶記憶的問答功能
+        answer, sources = rag_instance.ask_with_memory(request.question, conversation_id)
+        response_time = (datetime.now() - start_time).total_seconds()
+
+        # 檢查是否有圖表內容並載入圖表資訊（保持原有邏輯）
+        chart_images = []
+        chart_info_file = Path("pdfFiles/chart_metadata.json")
+
+        if chart_info_file.exists():
+            try:
+                with open(chart_info_file, 'r', encoding='utf-8') as f:
+                    chart_data = json.load(f)
+
+                for doc in sources[:5]:
+                    source_content = doc.page_content.lower()
+
+                    for chart_id, chart_info in chart_data.items():
+                        if 'generated_description' in chart_info:
+                            if is_chart_relevant(chart_info, source_content):
+                                image_path = f"static/charts/{chart_id}.jpg"
+
+                                if os.path.exists(image_path):
+                                    chart_images.append({
+                                        'chart_id': chart_id,
+                                        'image_url': f"/static/charts/{chart_id}.jpg",
+                                        'caption': chart_info.get('original_caption', ''),
+                                        'description': chart_info.get('generated_description', ''),
+                                        'chart_type': chart_info.get('chart_type', ''),
+                                        'chart_number': chart_info.get('chart_number', '')
+                                    })
+
+                                    if len(chart_images) >= 1:
+                                        break
+
+                    if len(chart_images) >= 1:
+                        break
+
+            except Exception as e:
+                print(f"載入圖表資訊時發生錯誤：{e}")
+
+        # 格式化來源資訊
+        formatted_sources = []
+        for doc in sources:
+            source_info = {
+                "source": os.path.basename(str(doc.metadata.get('source', '未知來源'))),
+                "page": doc.metadata.get('page', 0) + 1,
+                "content_preview": doc.page_content[:150] + "..." if len(doc.page_content) > 150 else doc.page_content
+            }
+            formatted_sources.append(source_info)
+
+        # 如果有相關圖表，將圖片資訊加入回應
+        final_answer = answer
+        if chart_images:
+            chart_info_text = "\n\n相關圖表：\n"
+            final_answer = answer + chart_info_text + f"\nCHARTS:{json.dumps(chart_images, ensure_ascii=False)}"
+
+        # 記錄問答到資料庫
+        log_question(current_user, request.question, final_answer, len(sources), response_time)
+
+        return ConversationResponse(
+            answer=final_answer,
+            sources=formatted_sources,
+            conversation_id=conversation_id
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"回答問題時發生錯誤：{str(e)}")
+
+
+# 6. 獲取對話歷史的端點
+@app.get("/conversation/history/{conversation_id}")
+async def get_conversation_history_api(
+        conversation_id: str,
+        current_user: str = Depends(get_current_user)
+):
+    """獲取指定對話的歷史記錄"""
+    global rag_instance
+
+    if not rag_instance:
+        raise HTTPException(status_code=400, detail="系統尚未初始化")
+
+    try:
+        # 檢查用戶權限（只能查看自己的對話或管理員可以查看所有對話）
+        if conversation_id != current_user:
+            user = get_user_from_db(user_id=current_user)
+            if not user or not user['is_admin']:
+                raise HTTPException(status_code=403, detail="沒有權限查看此對話")
+
+        history = rag_instance.get_conversation_history(conversation_id)
+        return {
+            "conversation_id": conversation_id,
+            "history": history,
+            "total_messages": len(history)
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"獲取對話歷史時發生錯誤：{str(e)}")
+
+
+# 7. 清除對話記憶的端點
+@app.delete("/conversation/memory/{conversation_id}")
+async def clear_conversation_memory(
+        conversation_id: str,
+        current_user: str = Depends(get_current_user)
+):
+    """清除指定對話的記憶"""
+    global rag_instance
+
+    if not rag_instance:
+        raise HTTPException(status_code=400, detail="系統尚未初始化")
+
+    try:
+        # 檢查用戶權限
+        if conversation_id != current_user:
+            user = get_user_from_db(user_id=current_user)
+            if not user or not user['is_admin']:
+                raise HTTPException(status_code=403, detail="沒有權限清除此對話記憶")
+
+        success = rag_instance.clear_memory(conversation_id)
+
+        if success:
+            return {"message": f"已清除對話 {conversation_id} 的記憶"}
+        else:
+            return {"message": "該對話沒有記憶需要清除"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"清除對話記憶時發生錯誤：{str(e)}")
+
+
+# 8. 獲取所有活躍對話列表（管理員功能）
+@app.get("/admin/conversations")
+async def get_active_conversations(current_user: str = Depends(get_current_user)):
+    """獲取所有活躍的對話列表（僅管理員）"""
+    verify_admin(current_user)
+
+    global rag_instance
+    if not rag_instance:
+        raise HTTPException(status_code=400, detail="系統尚未初始化")
+
+    try:
+        conversations = []
+        for user_id, memory in rag_instance.conversation_memory.items():
+            message_count = len(memory.chat_memory.messages)
+            if message_count > 0:
+                conversations.append({
+                    "conversation_id": user_id,
+                    "message_count": message_count,
+                    "last_activity": "N/A"  # 可以後續擴展時間戳記功能
+                })
+
+        return {
+            "active_conversations": conversations,
+            "total_count": len(conversations)
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"獲取對話列表時發生錯誤：{str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

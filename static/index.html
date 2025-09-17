@@ -400,7 +400,7 @@
             questionInput.disabled = true;
             scrollToBottom();
             try {
-                const response = await fetch('/ask', {
+                const response = await fetch('/ask/conversation', {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({ question: question })
@@ -474,14 +474,14 @@
                         chartData.forEach((chart, index) => {
                             chartsHtml += `
                                 <div class="chart-item" style="margin: 10px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
-                                    <h4 style="margin: 0 0 10px 0; color: #333;">
-                                        ${chart.chart_number ? `圖 ${chart.chart_number}: ` : ''}${chart.caption}
-                                    </h4>
                                     <img src="${chart.image_url}" 
                                         alt="${chart.caption}" 
                                         class="response-image chart-image" 
                                         style="max-width: 100%; height: auto; cursor: pointer; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
                                        onclick="openImageModal('${chart.image_url}', '圖${chart.chart_number}')">
+                                    <h4 style="margin: 0 0 10px 0; color: #333;">
+                                        ${chart.chart_number ? `圖 ${chart.chart_number}: ` : ''}${chart.caption}
+                                    </h4>
                                     <p style="margin: 10px 0 0 0; font-size: 14px; color: #666; font-style: italic;">
                                         ${chart.description}
                                     </p>
