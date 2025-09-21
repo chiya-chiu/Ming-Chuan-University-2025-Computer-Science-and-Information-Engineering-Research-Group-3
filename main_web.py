@@ -22,6 +22,8 @@ import glob
 import re
 import json
 from pathlib import Path
+from psycopg2 import pool
+from contextlib import contextmanager
 
 # 載入 .env 檔案
 load_dotenv()   # 載入環境變數，像是 API 金鑰
@@ -31,97 +33,103 @@ SECRET_KEY = os.getenv("SECRET_KEY", "hifumi_daisuki") # JWT 加密用
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30    #token 30 分鐘內有效
 
+connection_pool = None
+
+def init_connection_pool():
+    """初始化連接池"""
+    global connection_pool
+    try:
+        connection_pool = psycopg2.pool.ThreadedConnectionPool(
+            minconn=5,      # 最少保持 5 個連接
+            maxconn=20,     # 最多 20 個連接
+            dsn=DATABASE_URL,
+            cursor_factory=RealDictCursor,
+            sslmode='require' if ("render.com" in DATABASE_URL or "amazonaws.com" in DATABASE_URL) else 'disable'
+        )
+        print("✅ 連接池初始化成功")
+        return True
+    except Exception as e:
+        print(f"❌ 連接池初始化失敗: {e}")
+        return False
 # 資料庫連線設定
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("請在 .env 檔案中設定 DATABASE_URL")
 
+@contextmanager
 def get_db_connection():
-    """取得 PostgreSQL 資料庫連線"""
+    """取得資料庫連接的 Context Manager"""
+    conn = None
     try:
-        # 檢查是否為 Render 部署環境
-        if "render.com" in DATABASE_URL or "amazonaws.com" in DATABASE_URL:
-            # 雲端環境需要 SSL 連線
-            conn = psycopg2.connect(
-                DATABASE_URL,
-                cursor_factory=RealDictCursor,
-                sslmode='require'
-            )
-        else:
-            # 本地環境不需要 SSL 連線
-            conn = psycopg2.connect(
-                DATABASE_URL,
-                cursor_factory=RealDictCursor,
-                sslmode='disable'  # 本地測試時停用 SSL
-            )
-        return conn
+        if connection_pool is None:
+            raise Exception("連接池未初始化")
+        
+        conn = connection_pool.getconn()
+        if conn is None:
+            raise Exception("無法從連接池獲取連接")
+        
+        yield conn
+        
     except Exception as e:
-        print(f"資料庫連線失敗: {e}")
+        if conn:
+            conn.rollback()  # 發生錯誤時回滾
         raise e
+    finally:
+        if conn:
+            connection_pool.putconn(conn)  # 歸還連接到池中
 
 def test_db_connection():
-    """測試資料庫連線"""
+    """測試資料庫連線（使用連接池）"""
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT version();")
-        version = cursor.fetchone()
-        print(f"✅ 資料庫連線成功: {version['version']}")
-        cursor.close()
-        conn.close()
-        return True
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT version();")
+            version = cursor.fetchone()
+            print(f"✅ 資料庫連線成功: {version['version']}")
+            cursor.close()
+            return True
     except Exception as e:
         print(f"❌ 資料庫連線失敗: {e}")
         return False
-
+        
 # 資料庫初始化
 def init_database():
-    """初始化 PostgreSQL 資料庫"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    """初始化資料庫（使用連接池）"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
 
-    # 使用者表 - PostgreSQL 語法
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,                    -- PostgreSQL 的自動遞增 ID
-            user_id VARCHAR(255) UNIQUE NOT NULL,     -- 使用者唯一 ID（UUID）
-            username VARCHAR(255) UNIQUE NOT NULL,    -- 使用者名稱（唯一）
-            email VARCHAR(255),                       -- 電子信箱（可選）
-            password_hash VARCHAR(255) NOT NULL,      -- 密碼的 SHA256 雜湊值
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 註冊時間 使用 PostgreSQL 語法
-            is_active BOOLEAN DEFAULT TRUE,           -- 是否啟用
-            is_admin BOOLEAN DEFAULT FALSE            -- 是否為管理員
-        )
-    ''')
+        # 使用者表
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                user_id VARCHAR(255) UNIQUE NOT NULL,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                email VARCHAR(255),
+                password_hash VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                is_active BOOLEAN DEFAULT TRUE,
+                is_admin BOOLEAN DEFAULT FALSE
+            )
+        ''')
 
-    # 問答紀錄表 - PostgreSQL 語法
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS questions_log (
-            id SERIAL PRIMARY KEY,                    -- 問答紀錄編號
-            user_id VARCHAR(255) NOT NULL,            -- 使用者 ID
-            question TEXT NOT NULL,                   -- 問題內容
-            answer TEXT NOT NULL,                     -- 回答內容
-            sources_count INTEGER DEFAULT 0,          -- 來源段落數
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 問答發生時間
-            response_time REAL,                       -- 回答耗時（秒）
-            FOREIGN KEY(user_id) REFERENCES users(user_id) -- 關聯到 users 表
-        )
-    ''')
+        # 問答紀錄表
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS questions_log (
+                id SERIAL PRIMARY KEY,
+                user_id VARCHAR(255) NOT NULL,
+                question TEXT NOT NULL,
+                answer TEXT NOT NULL,
+                sources_count INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                response_time REAL,
+                FOREIGN KEY(user_id) REFERENCES users(user_id)
+            )
+        ''')
 
-    conn.commit()   # 儲存變更
-    cursor.close()
-    conn.close()    # 關閉連線
+        conn.commit()
+        cursor.close()
 
-# 應用程式生命週期管理
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # 啟動時執行
-    print("🔧 初始化資料庫...")
-    test_db_connection()  # 測試連線
-    init_database()
-    print("✅ 資料庫初始化完成")
-    yield
-    # 關閉時執行（如果需要清理）
+
 
 #這就是後端網站的主體
 app = FastAPI(
@@ -243,36 +251,56 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         )
 
 def get_user_from_db(user_id: str = None, username: str = None):
-    """從資料庫取得使用者資料 - PostgreSQL 版本"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    """從資料庫取得使用者資料（使用連接池）"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
 
-    if user_id:
-        cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
-    elif username:
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-    else:
+        if user_id:
+            cursor.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
+        elif username:
+            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        else:
+            cursor.close()
+            return None
+
+        user = cursor.fetchone()
         cursor.close()
-        conn.close()
-        return None
-
-    user = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return user
+        return user
 
 def log_question(user_id: str, question: str, answer: str, sources_count: int, response_time: float):
-    """記錄問答到資料庫 - PostgreSQL 版本"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO questions_log (user_id, question, answer, sources_count, response_time)
-        VALUES (%s, %s, %s, %s, %s)
-    ''', (user_id, question, answer, sources_count, response_time))  # 儲存完整的 answer，包含 CHARTS: 資訊
-    conn.commit()
-    cursor.close()
-    conn.close()
+    """記錄問答到資料庫（使用連接池）"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO questions_log (user_id, question, answer, sources_count, response_time)
+            VALUES (%s, %s, %s, %s, %s)
+        ''', (user_id, question, answer, sources_count, response_time))
+        conn.commit()
+        cursor.close()
+# 修改應用程式生命週期管理
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 啟動時執行
+    print("🔧 初始化連接池...")
+    if not init_connection_pool():
+        raise Exception("連接池初始化失敗")
+    
+    print("🔧 測試資料庫連線...")
+    test_db_connection()
+    
+    print("🔧 初始化資料庫...")
+    init_database()
+    print("✅ 系統初始化完成")
+    
+    yield
+    
+    # 關閉時執行
+    global connection_pool
+    if connection_pool:
+        connection_pool.closeall()
+        print("🔧 連接池已關閉")
 
+        
 def verify_admin(user_id: str):
     """驗證管理員權限"""
     user = get_user_from_db(user_id=user_id)
@@ -299,31 +327,30 @@ async def serve_index():
 
 @app.post("/register")
 async def register_user(user: UserRegister):
-    """使用者註冊 - PostgreSQL 版本"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    """使用者註冊（使用連接池）"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
 
-    # 檢查使用者是否已存在
-    cursor.execute("SELECT * FROM users WHERE username = %s", (user.username,))
-    if cursor.fetchone():
+        # 檢查使用者是否已存在
+        cursor.execute("SELECT * FROM users WHERE username = %s", (user.username,))
+        if cursor.fetchone():
+            cursor.close()
+            raise HTTPException(status_code=400, detail="使用者名稱已存在")
+
+        # 建立新使用者
+        user_id = str(uuid.uuid4())
+        password_hash = hash_password(user.password)
+
+        cursor.execute('''
+            INSERT INTO users (user_id, username, password_hash)
+            VALUES (%s, %s, %s)
+        ''', (user_id, user.username, password_hash))
+
+        conn.commit()
         cursor.close()
-        conn.close()
-        raise HTTPException(status_code=400, detail="使用者名稱已存在")
-
-    # 建立新使用者
-    user_id = str(uuid.uuid4())
-    password_hash = hash_password(user.password)
-
-    cursor.execute('''
-        INSERT INTO users (user_id, username, password_hash)
-        VALUES (%s, %s, %s)
-    ''', (user_id, user.username, password_hash))
-
-    conn.commit()
-    cursor.close()
-    conn.close()
 
     return {"message": "註冊成功", "user_id": user_id}
+
 
 @app.post("/login", response_model=Token)
 async def login_user(user: UserLogin):
@@ -473,29 +500,28 @@ async def ask_question(request: QuestionRequest, current_user: str = Depends(get
 
 @app.get("/stats", response_model=UserStats)
 async def get_user_stats(current_user: str = Depends(get_current_user)):
-    """取得使用者問答統計 - PostgreSQL 版本"""
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    """取得使用者問答統計（使用連接池）"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
 
-    # 總問題數
-    cursor.execute("SELECT COUNT(*) FROM questions_log WHERE user_id = %s", (current_user,))
-    total_questions = cursor.fetchone()['count']
+        # 總問題數
+        cursor.execute("SELECT COUNT(*) FROM questions_log WHERE user_id = %s", (current_user,))
+        total_questions = cursor.fetchone()['count']
 
-    # 今日問題數 - 使用 PostgreSQL 語法
-    cursor.execute('''
-        SELECT COUNT(*)
-        FROM questions_log
-        WHERE user_id = %s AND DATE(created_at) = CURRENT_DATE
-    ''', (current_user,))
-    questions_today = cursor.fetchone()['count']
+        # 今日問題數
+        cursor.execute('''
+            SELECT COUNT(*)
+            FROM questions_log
+            WHERE user_id = %s AND DATE(created_at) = CURRENT_DATE
+        ''', (current_user,))
+        questions_today = cursor.fetchone()['count']
 
-    # 平均回應時間
-    cursor.execute("SELECT AVG(response_time) FROM questions_log WHERE user_id = %s", (current_user,))
-    result = cursor.fetchone()
-    avg_response_time = float(result['avg']) if result['avg'] else 0.0
+        # 平均回應時間
+        cursor.execute("SELECT AVG(response_time) FROM questions_log WHERE user_id = %s", (current_user,))
+        result = cursor.fetchone()
+        avg_response_time = float(result['avg']) if result['avg'] else 0.0
 
-    cursor.close()
-    conn.close()
+        cursor.close()
 
     return UserStats(
         total_questions=total_questions,
