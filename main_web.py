@@ -1,7 +1,18 @@
 import os
+import sys
 import asyncio
 import hashlib
 import jwt
+
+# 設定 UTF-8 編碼輸出
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+        sys.stderr.reconfigure(encoding='utf-8')
+    except:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
 from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -129,7 +140,34 @@ def init_database():
         conn.commit()
         cursor.close()
 
+# 修改應用程式生命週期管理
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 啟動時執行
+    print("🔧 初始化服務...")
+    try:
+        print("🔧 初始化連接池...")
+        if not init_connection_pool():
+            raise Exception("連接池初始化失敗")
 
+        print("🔧 測試資料庫連線...")
+        test_db_connection()
+
+        print("🔧 初始化資料庫...")
+        init_database()
+        print("✅ 資料庫初始化完成")
+    except Exception as e:
+        print(f"⚠️ 資料庫初始化失敗，繼續以無資料庫模式運行: {e}")
+        print("📝 註：用戶相關功能將無法使用，但ABC圖表處理功能仍可正常運作")
+
+    print("🚀 服務啟動完成")
+    yield
+
+    # 關閉時執行
+    global connection_pool
+    if connection_pool:
+        connection_pool.closeall()
+        print("🔧 連接池已關閉")
 
 #這就是後端網站的主體
 app = FastAPI(
@@ -277,30 +315,7 @@ def log_question(user_id: str, question: str, answer: str, sources_count: int, r
         ''', (user_id, question, answer, sources_count, response_time))
         conn.commit()
         cursor.close()
-# 修改應用程式生命週期管理
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # 啟動時執行
-    print("🔧 初始化連接池...")
-    if not init_connection_pool():
-        raise Exception("連接池初始化失敗")
-    
-    print("🔧 測試資料庫連線...")
-    test_db_connection()
-    
-    print("🔧 初始化資料庫...")
-    init_database()
-    print("✅ 系統初始化完成")
-    
-    yield
-    
-    # 關閉時執行
-    global connection_pool
-    if connection_pool:
-        connection_pool.closeall()
-        print("🔧 連接池已關閉")
 
-        
 def verify_admin(user_id: str):
     """驗證管理員權限"""
     user = get_user_from_db(user_id=user_id)
@@ -1044,7 +1059,7 @@ async def get_active_conversations(current_user: str = Depends(get_current_user)
 if __name__ == "__main__":
     import uvicorn
 
-    print("🚀 啟動 RAG 網站服務（PostgreSQL 版本）...")
+    print("🚀 啟動 RAG 網站服務（PostgreSQL + ABC階段圖表處理）...")
     print("📱 網站網址：http://localhost:8080")
     print("📚 API 文件：http://localhost:8080/docs")
     print("📁 請確保 pdfFiles 資料夾中有要處理的檔案")
