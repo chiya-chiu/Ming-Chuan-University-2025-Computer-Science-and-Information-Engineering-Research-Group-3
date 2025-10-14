@@ -27,7 +27,7 @@ from langchain_community.document_loaders import (
     UnstructuredMarkdownLoader,
 )
 
-from Split_Helper import SplitHelper
+from backend.Split_Helper import SplitHelper
 from llm_config import LLMConfig, get_openai_embeddings
 
 
@@ -185,8 +185,14 @@ class RAGHelper:
             # ★ 優先檢查是否存在 enhanced_doc_*.txt（預處理後的增強文件）
             enhanced_docs = []
             if use_enhanced_docs:
-                enhanced_pattern = os.path.join(self.pdf_folder, "enhanced_doc_*.txt")
+                # 新路徑：pdfFiles/enhanced_docs/
+                enhanced_pattern = os.path.join(self.pdf_folder, "enhanced_docs", "enhanced_doc_*.txt")
                 enhanced_docs = glob.glob(enhanced_pattern)
+
+                # 如果新路徑沒有，檢查舊路徑（向後兼容）
+                if not enhanced_docs:
+                    enhanced_pattern_legacy = os.path.join(self.pdf_folder, "enhanced_doc_*.txt")
+                    enhanced_docs = glob.glob(enhanced_pattern_legacy)
 
             all_chunks = []
 

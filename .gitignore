@@ -18,15 +18,27 @@ enhanced_faiss_index/
 trulens_env_new/
 
 # Enhanced RAG Helper 產生檔案
-chart_metadata.json
+<<<<<<< HEAD
+#chart_metadata.json
 temp_enhanced_docs/
-pdfFiles/enhanced_docs/
+#pdfFiles/enhanced_docs/
+=======
+temp_enhanced_docs/
+chart_images/
+
+# ✅ 允許上傳 enhanced_docs 和 chart_metadata（預處理成果）
+# pdfFiles/enhanced_docs/
+# chart_metadata.json
+
+# 測試檔案
+test_rag_enhanced.py
+>>>>>>> 84076235ee92bed4d13066664a9d2c14365a66a2
 
 # Obsidian 設定
 .obsidian/
 
 # 測試資料 - 不上傳multi_data資料夾
-pdfFiles/multi_data/
+#pdfFiles/multi_data/
 
 # PDF圖表切割結果 - 不上傳處理結果
 test_ImageCut_result/

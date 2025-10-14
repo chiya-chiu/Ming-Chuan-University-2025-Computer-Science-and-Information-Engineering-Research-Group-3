@@ -32,8 +32,25 @@
                     還沒有帳號嗎？
                 </font>
             </span>
-            <a href="#" id="toggleLink">立即註冊</a>
+            <a href="#" id="toggleLink">點我立即註冊!</a>
         </div>
+
+        <footer class="artist-credit" style="font-size: 13px;">  
+            <p><strong>關於背景圖片:</strong></p>
+            <p class="disclaimer">本網站所使用的背景圖片僅作教育與學習用途，無任何商業意圖。圖片版權歸原作者所有，歡迎大家前往支持與追蹤原作者！</p>
+            <p>背景圖繪師: MISSILE228</p>
+            <nav aria-label="繪師連結">
+                <ul>
+                    <li>
+                        繪師 X: <a href="https://x.com/MISSILE228apl" target="_blank" rel="noopener noreferrer">https://x.com/MISSILE228apl</a>
+                    </li>
+                    <li>
+                        繪師 pixiv: <a href="https://www.pixiv.net/users/429077" target="_blank" rel="noopener noreferrer">https://www.pixiv.net/users/429077</a>
+                    </li>
+                </ul>
+            </nav>
+        </footer>
+
     </div>
 
     <!-- 主要問答系統 -->
@@ -69,8 +86,10 @@
 
             <!-- 使用者統計資訊 -->
             <div class="stats-block user-stats" id="userStats">
-                <font face="DFKai-sb" color="black" size = 4>
-                    <h3>📊 我的統計</h3>
+                <font face="DFKai-sb" color="White" size = 4>
+                    <h3>
+                        📊 我的統計
+                    <h3>
                     <div id="userStatsContent">讀取中...</div>
                 </font>
             </div>
@@ -330,9 +349,9 @@
 
                 if (res.ok) {
                     document.getElementById('userStatsContent').innerHTML = `
-                        👤 總提問次數：${data.total_questions} <br>
-                        📅 今日提問次數：${data.questions_today} <br>
-                        ⏱ 平均回應時間：${data.avg_response_time} 秒 <br>   
+                    👤 總提問次數：${data.total_questions} <br>
+                    📅 今日提問次數：${data.questions_today} <br>
+                    🗨️ 平均回應時間：${data.avg_response_time} 秒 <br>   
                     `;
                     //🧠 常見主題：${data.most_asked_topics.join(', ')}  
                 } else {
@@ -473,13 +492,13 @@
                         chartsHtml = '<div class="chart-container">';
                         chartData.forEach((chart, index) => {
                             chartsHtml += `
-                                <div class="chart-item" style="margin: 10px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+                                <div class="chart-item" style="margin: 10px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; background: #e9ecef;">
                                     <img src="${chart.image_url}" 
                                         alt="${chart.caption}" 
                                         class="response-image chart-image" 
                                         style="max-width: 100%; height: auto; cursor: pointer; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
-                                       onclick="openImageModal('${chart.image_url}', '圖${chart.chart_number}')">
-                                    <h4 style="margin: 0 0 10px 0; color: #333;">
+                                       onclick="openImageModal('${chart.image_url}')">
+                                    <h4 style="margin: 0 0 10px 0; color: #000000;">
                                         ${chart.chart_number ? `圖 ${chart.chart_number}: ` : ''}${chart.caption}
                                     </h4>
                                     <p style="margin: 10px 0 0 0; font-size: 14px; color: #666; font-style: italic;">

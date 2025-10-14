@@ -1,7 +1,0 @@
-XOR (exclusive-or,互斥或)
-X Y output
-000
-01 1
-101
-11 0
- (找不⼀樣的為 1)

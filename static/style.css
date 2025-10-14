@@ -2,8 +2,8 @@ body.chat-mode {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0px; 
-    background: url('/static/background.jpg') center/cover no-repeat fixed, 
-                linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    background: url('/static/background.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    /*background:rgb(0, 0, 0);*/
     height: 100vh;
     overflow: hidden;
 }
@@ -14,8 +14,8 @@ body.auth-mode {
     margin: 0;
     padding: 0px;
     /* 這裡放你想要的登入背景，例如： */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background: url('/static/login-background.jpg') center/cover no-repeat fixed; 
+    /*background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);*/
+    background: url('/static/login-background.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%);; 
     height: 100vh;
     overflow: hidden;
 }
@@ -91,7 +91,7 @@ h1 {
     color: white
 }
 .status-ready {		/* 就緒：綠色 */
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #26a657 0%, #19ea69 100%);
     color: white;
 }
 .status-error {		/* 錯誤：紅色 */
@@ -108,7 +108,7 @@ h1 {
 .chat-messages { 
 	flex: 1;              /* 占滿剩餘空間 */
 	overflow-y: auto; 			/*內容太多時可滾動*/
-	border: 0px solid #e9ecef; 
+	border: 0px solid #dadde0; 
 	padding: 10px; 
 	margin-bottom: 0px; 
 	background: transparent; 
@@ -162,8 +162,8 @@ h1 {
 	line-height: 1.5;
 }
 .user-message .message-content { 
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);	/*使用者訊息 漸層背景（藍紫色），白字，右下角較尖*/
-    color: white;
+	background: rgba(255, 255, 255, 0.95);	/*使用者訊息 漸層背景（藍紫色），白字，右下角較尖*/
+    color: rgb(0, 0, 0);
     padding: 12px 18px;
     border-radius: 18px 18px 5px 18px;
     max-width: 70%;
@@ -171,8 +171,9 @@ h1 {
     text-align: left; /* 改為左對齊 */
 }
 .bot-message .message-content { 		/*AI 訊息 白色背景，灰框，左下角較尖*/
-	background: rgba(255,255,255,0.9); /* 保持白色但稍微透明 */
-	color: #333; 
+	/*background: rgba(255,255,255,0.8); /* 保持白色但稍微透明 */
+    background: rgba(255, 255, 255, 0.95);
+	color: #000000; 
 	border: 1px solid rgba(255,255,255,0.3);
 	border-bottom-left-radius: 5px;
 }
@@ -201,7 +202,7 @@ h1 {
 	border-color: #667eea;
 }
 .send-btn { 
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	background: linear-gradient(135deg, #323235 0%, #4a454f 100%);
 	color: white; 
 	padding: 15px 25px; 
 	border: none; 
@@ -265,7 +266,7 @@ h1 {
 
 /* 清除歷史按鈕樣式 */
 .clear-history-btn {
-	background: #ffc107;
+	background: #e5c35e;
 	color: #212529;
 	border: none;
 	padding: 5px 15px;
@@ -276,7 +277,7 @@ h1 {
 }
 
 .clear-history-btn {
-    background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%);
+    background: linear-gradient(135deg, #2e2c2c 0%, #524849 100%);
     color: white;
 }
 
@@ -299,7 +300,7 @@ h1 {
 /* 訊息時間戳記樣式 */
 .message-time {
 	font-size: 12px;
-	color: #888;
+	color: #ff0000;
 	margin-top: 5px;
 	text-align: right;
 }
@@ -308,14 +309,14 @@ h1 {
 	text-align: right;
 	margin-top: 5px;
     font-size: 12px;
-    color: #888;
+    color: #ffffff;
 }
 
 .bot-message .message-time {
     text-align: left;
     margin-top: 5px;
     font-size: 12px;
-    color: #888;
+    color: #ffffff;
 }
 /* 歷史訊息與新訊息的區別 */
 .message.history {
@@ -359,7 +360,8 @@ h1 {
 	font-size: 16px;
 }
 .auth-btn {
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	/*background: linear-gradient(135deg, #3a3838 0%, #847c9f 100%);*/
+    background: rgb(69, 69, 69);
 	color: white;
 	padding: 12px;
 	border: none;
@@ -379,16 +381,17 @@ h1 {
 }
 .user-info {
 	padding: 15px;
-	background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+	background: rgba(237, 236, 236, 0.3);
 	border-radius: 12px;
 	margin-bottom: 10px;
-	background: rgba(255,255,255,0.15);
+	/*background: rgba(255,255,255,0.15);*/
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.2);
     color: #ecf0f1;
 }
 .logout-btn {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    background: linear-gradient(135deg, #2e2c2c 0%, #524849 100%);
+    /*background: rgba(155, 122, 122, 0.15);*/
     color: white;
 }
 
@@ -405,9 +408,9 @@ h1 {
 .main-layout {
 	display: flex;
 	gap: 15px;
-	max-width: 1400px;
-	margin: 0 ;
-	padding: 0px 0px 0px 330px;
+	max-width: 1900px;
+	margin: 0 auto;
+	padding: 0px 0px 0px 0px;
 	height: 100vh; /* 占滿整個視窗高度 */
 }
 
@@ -426,8 +429,8 @@ h1 {
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
-	background: transparent;
-	border-radius: 15px;
+	background: rgba(35, 35, 35, 0.3);
+	/*border-radius: 15px;*/
 	overflow: hidden;
 }
 
@@ -439,11 +442,13 @@ h1 {
 	background: rgba(255,255,255,0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.2);
-    color: #ecf0f1;
+    color: #434343;
 }
 
 .user-stats {
-	background: linear-gradient(135deg, #e9f7ef 0%, #d4edda 100%);
+	/*background: linear-gradient(135deg, #e9f7ef 0%, #d4edda 100%);*/
+    /*background: linear-gradient(135deg, #b1b1b1 0%, #908385 100%);*/
+    background: rgba(212, 212, 212, 0.3);
 }
 
 .admin-stats {
@@ -453,13 +458,13 @@ h1 {
 .stats-block h3 {
 	margin: 0 0 10px 0;
 	font-size: 18px;
-	color: #333;
+	color: #ffffff;
 }
 
 /* 系統狀態區塊樣式（在左側時） */
 .system-status-block {
     padding: 0; /* 移除 padding，讓內部的 system-status 控制間距 */
-    background: transparent;
+    background: rgba(197, 196, 196, 0.3);
     box-shadow: none;
 }
 
@@ -546,11 +551,11 @@ h1 {
 
 /* 確保在深色背景下的可讀性 */
 .bot-message .message-content .katex {
-    color: #333;
+    color: #000000;
 }
 
 .user-message .message-content .katex {
-    color: white;
+    color: rgb(0, 0, 0);
 }
 
     /* Q版人物對話區樣式 */
@@ -736,6 +741,15 @@ h1 {
 /* 手機版專用排版 - 2025 最佳實踐優化版 */
 @media (max-width: 768px) {
     /* 重設主體佈局 - 使用現代彈性布局 */
+
+    .chat-mode{
+        background: url('/static/background02.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    }   
+
+    .auth-mode{
+        background: url('/static/login-background02.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%)!important;
+    }
+
     .main-layout {
         flex-direction: column !important;
         padding: 0 !important;
@@ -753,9 +767,9 @@ h1 {
         flex-direction: column !important;
         max-height: 70px !important; /* 減少高度，給聊天區更多空間 */
         min-height: 70px !important;
-        padding: env(safe-area-inset-top, 8px) 12px 8px 12px !important; /* 支援瀏海屏安全區域 */
-        background: rgba(255,255,255,0.95) !important; /* 更好的對比度 */
-        backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
+        /*padding: env(safe-area-inset-top, 8px) 12px 8px 12px !important; /* 支援瀏海屏安全區域 */ 
+        /*background: rgba(255,255,255,0.95) !important; /* 更好的對比度 */
+       /* backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
         border-bottom: 0.5px solid rgba(0,0,0,0.1) !important; /* 更精細的分割線 */
         gap: 0 !important;
         overflow: visible !important;
@@ -781,10 +795,10 @@ h1 {
     
     /* 用戶資訊區塊 - 現代卡片式設計 */
     .stats-sidebar .user-info {
-        background: transparent !important;
-        padding: 0 !important;
+        background: rgba(150, 150, 150, 0.177) ;
+        padding: 10px !important;
         margin: 0 !important;
-        backdrop-filter: none !important;
+        /*backdrop-filter: none !important;*/
         border: none !important;
         display: flex !important;
         flex-direction: row !important;
@@ -792,6 +806,7 @@ h1 {
         justify-content: space-between !important;
         height: 100% !important;
         min-height: 54px !important; /* 符合觸控友好高度 */
+        border-radius: 0px;
     }
     
     /* 用戶歡迎文字 - 優化可讀性 */
@@ -819,22 +834,23 @@ h1 {
         display: flex !important;
         flex-direction: row !important;
         flex-shrink: 0 !important; /* 按鈕不縮小 */
+
     }
     
     /* 按鈕樣式 - 符合iOS/Android設計規範 */
     .user-info .clear-history-btn,
     .user-info .logout-btn {
         padding: 8px 14px !important; /* 稍微增大觸控區域 */
+        border: 50px ;
         font-size: 12px !important;
         font-weight: 500 !important;
         border-radius: 20px !important; /* 更圓潤的現代設計 */
-        min-width: 60px !important; /* 最小觸控寬度 */
+        min-width: 100px !important; /* 最小觸控寬度 */
         min-height: 36px !important; /* 最小觸控高度 */
         flex: none !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        border: none !important;
         cursor: pointer !important;
         transition: all 0.2s ease !important;
         user-select: none !important; /* 防止文字選擇 */
@@ -939,7 +955,7 @@ h1 {
     .message-time {
         font-size: 11px !important;
         margin-top: 4px !important;
-        color: #999 !important;
+        color: #ffffff !important;
         font-weight: 400 !important;
     }
     
@@ -947,9 +963,10 @@ h1 {
     .main-content .input-group {
         position: sticky !important;
         bottom: 0 !important;
-        background: rgba(255,255,255,0.95) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
-        border-top: 0.5px solid rgba(0,0,0,0.1) !important;
+        background: rgba(255, 255, 255, 0.124) !important;
+        /*backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
+        backdrop-filter: blur(10px);
+        border-top: 0.5px solid rgba(0, 0, 0, 0.177) !important;
         padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px !important; /* 支援底部安全區域 */
         margin: 0 !important;
         z-index: 100 !important;
@@ -959,7 +976,7 @@ h1 {
         display: flex !important;
         align-items: flex-end !important;
         gap: 10px !important;
-        box-shadow: 0 -1px 10px rgba(0,0,0,0.05) !important; /* 向上陰影 */
+        box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.126) !important; /* 向上陰影 */
     }
     
     /* 輸入框 - iOS風格設計 */
@@ -1193,7 +1210,7 @@ h1 {
     body.auth-mode .auth-container {
         margin: 20px !important;
         padding: 24px !important;
-        width: calc(100% - 40px) !important;
+        /*width: calc(100% - 40px) !important;*/
         max-width: none !important;
         border-radius: 16px !important;
     }

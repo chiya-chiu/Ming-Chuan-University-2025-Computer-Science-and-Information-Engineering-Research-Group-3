@@ -1,6 +1,6 @@
 import os
 import asyncio
-from RAG_Helper import RAGHelper
+from backend.RAG_Helper import RAGHelper
 from dotenv import load_dotenv
 
 # 載入 .env 檔案

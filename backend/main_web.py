@@ -9,8 +9,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import List, Optional
-#from RAG_Helper import RAGHelper
-from MultiTurnRAGHelper import MultiTurnRAGHelper
+#from backend.RAG_Helper import RAGHelper
+from backend.MultiTurnRAGHelper import MultiTurnRAGHelper
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
