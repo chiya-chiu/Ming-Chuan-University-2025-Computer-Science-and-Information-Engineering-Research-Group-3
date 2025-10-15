@@ -34,9 +34,6 @@ test_rag_enhanced.py
 # 過濾掉的小圖片（不上傳）
 static/charts_filtered_out/
 
-# 各別 PDF 的 metadata（不上傳，已整合到 chart_metadata.json）
-static/charts/*_metadata.json
-
 # 錯誤產生的檔案
 nul
 

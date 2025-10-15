@@ -1,0 +1,648 @@
+{
+  "source_pdf": "pdfFiles\\計概第一章(更新版).pdf",
+  "extraction_time": "2025-10-15T15:19:49.108077",
+  "output_directory": "static\\charts",
+  "total_images": 40,
+  "images": [
+    {
+      "page": 1,
+      "bbox": [
+        27.3439998626709,
+        28.930023193359375,
+        582.8939819335938,
+        311.9400329589844
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p001_01.png",
+      "filename": "計概第一章(更新版)_fig_p001_01.png",
+      "width": 1920,
+      "height": 979,
+      "extracted_at": "2025-10-15T15:19:48.044457",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 1,
+      "bbox": [
+        258.239990234375,
+        238.3200225830078,
+        582.8900146484375,
+        419.3600158691406
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p001_02.png",
+      "filename": "計概第一章(更新版)_fig_p001_02.png",
+      "width": 866,
+      "height": 482,
+      "extracted_at": "2025-10-15T15:19:48.057422",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 1,
+      "bbox": [
+        27.3439998626709,
+        260.82000732421875,
+        582.8939819335938,
+        781.3500366210938
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p001_03.png",
+      "filename": "計概第一章(更新版)_fig_p001_03.png",
+      "width": 1481,
+      "height": 1388,
+      "extracted_at": "2025-10-15T15:19:48.118260",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 1,
+      "bbox": [
+        335.3999938964844,
+        270.087158203125,
+        352.1479797363281,
+        275.300048828125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p001_04.png",
+      "filename": "計概第一章(更新版)_fig_p001_04.png",
+      "width": 45,
+      "height": 14,
+      "extracted_at": "2025-10-15T15:19:48.119264",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 1,
+      "bbox": [
+        67.9219970703125,
+        260.7610168457031,
+        479.74200439453125,
+        331.84002685546875
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p001_05.png",
+      "filename": "計概第一章(更新版)_fig_p001_05.png",
+      "width": 859,
+      "height": 149,
+      "extracted_at": "2025-10-15T15:19:48.125241",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 1,
+      "bbox": [
+        67.9219970703125,
+        268.35101318359375,
+        352.3219909667969,
+        320.96002197265625
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p001_06.png",
+      "filename": "計概第一章(更新版)_fig_p001_06.png",
+      "width": 670,
+      "height": 146,
+      "extracted_at": "2025-10-15T15:19:48.129230",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 2,
+      "bbox": [
+        88.31999969482422,
+        109.08004760742188,
+        116.76000213623047,
+        132.24005126953125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p002_01.png",
+      "filename": "計概第一章(更新版)_fig_p002_01.png",
+      "width": 79,
+      "height": 64,
+      "extracted_at": "2025-10-15T15:19:48.193060",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 2,
+      "bbox": [
+        138.83999633789062,
+        117.84001159667969,
+        303.8399963378906,
+        137.760009765625
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p002_02.png",
+      "filename": "計概第一章(更新版)_fig_p002_02.png",
+      "width": 458,
+      "height": 55,
+      "extracted_at": "2025-10-15T15:19:48.195055",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 2,
+      "bbox": [
+        406.8399963378906,
+        170.24801635742188,
+        519.280029296875,
+        260.20001220703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p002_03.png",
+      "filename": "計概第一章(更新版)_fig_p002_03.png",
+      "width": 375,
+      "height": 300,
+      "extracted_at": "2025-10-15T15:19:48.205028",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 2,
+      "bbox": [
+        410.6000061035156,
+        645.510009765625,
+        523.9100341796875,
+        700.760009765625
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p002_04.png",
+      "filename": "計概第一章(更新版)_fig_p002_04.png",
+      "width": 314,
+      "height": 153,
+      "extracted_at": "2025-10-15T15:19:48.210014",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 3,
+      "bbox": [
+        114.80000305175781,
+        198.6300048828125,
+        511.0999755859375,
+        496.2300109863281
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p003_01.png",
+      "filename": "計概第一章(更新版)_fig_p003_01.png",
+      "width": 1321,
+      "height": 992,
+      "extracted_at": "2025-10-15T15:19:48.310708",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 4,
+      "bbox": [
+        329.75,
+        610.9220581054688,
+        392.95001220703125,
+        702.9700317382812
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p004_01.png",
+      "filename": "計概第一章(更新版)_fig_p004_01.png",
+      "width": 175,
+      "height": 255,
+      "extracted_at": "2025-10-15T15:19:48.328638",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 4,
+      "bbox": [
+        406.25,
+        614.6199951171875,
+        518.6199951171875,
+        699.3200073242188
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p004_02.png",
+      "filename": "計概第一章(更新版)_fig_p004_02.png",
+      "width": 225,
+      "height": 169,
+      "extracted_at": "2025-10-15T15:19:48.335617",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 4,
+      "bbox": [
+        163.7100067138672,
+        299.4900207519531,
+        429.66998291015625,
+        386.260009765625
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p004_03.png",
+      "filename": "計概第一章(更新版)_fig_p004_03.png",
+      "width": 738,
+      "height": 241,
+      "extracted_at": "2025-10-15T15:19:48.359544",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 5,
+      "bbox": [
+        384.3500061035156,
+        306.1700134277344,
+        511.8900146484375,
+        473.9900207519531
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p005_01.png",
+      "filename": "計概第一章(更新版)_fig_p005_01.png",
+      "width": 355,
+      "height": 434,
+      "extracted_at": "2025-10-15T15:19:48.389893",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 6,
+      "bbox": [
+        430.20001220703125,
+        93.60000610351562,
+        570.300048828125,
+        286.760009765625
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p006_01.png",
+      "filename": "計概第一章(更新版)_fig_p006_01.png",
+      "width": 429,
+      "height": 591,
+      "extracted_at": "2025-10-15T15:19:48.424800",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 6,
+      "bbox": [
+        435.0,
+        394.8000183105469,
+        581.3499755859375,
+        492.45001220703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p006_02.png",
+      "filename": "計概第一章(更新版)_fig_p006_02.png",
+      "width": 448,
+      "height": 299,
+      "extracted_at": "2025-10-15T15:19:48.434692",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 7,
+      "bbox": [
+        472.0799865722656,
+        206.280029296875,
+        601.739990234375,
+        336.1800231933594
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p007_01.png",
+      "filename": "計概第一章(更新版)_fig_p007_01.png",
+      "width": 361,
+      "height": 361,
+      "extracted_at": "2025-10-15T15:19:48.457630",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 8,
+      "bbox": [
+        447.4800109863281,
+        120.1200180053711,
+        582.5400390625,
+        238.1400146484375
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p008_01.png",
+      "filename": "計概第一章(更新版)_fig_p008_01.png",
+      "width": 376,
+      "height": 328,
+      "extracted_at": "2025-10-15T15:19:48.497485",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 8,
+      "bbox": [
+        222.0,
+        277.7900390625,
+        367.6000061035156,
+        472.1600341796875
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p008_02.png",
+      "filename": "計概第一章(更新版)_fig_p008_02.png",
+      "width": 444,
+      "height": 593,
+      "extracted_at": "2025-10-15T15:19:48.524381",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 8,
+      "bbox": [
+        90.75,
+        543.7970581054688,
+        521.5499877929688,
+        736.8470458984375
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p008_03.png",
+      "filename": "計概第一章(更新版)_fig_p008_03.png",
+      "width": 1412,
+      "height": 633,
+      "extracted_at": "2025-10-15T15:19:48.556296",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 9,
+      "bbox": [
+        406.67999267578125,
+        94.68000030517578,
+        547.739990234375,
+        220.5
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p009_01.png",
+      "filename": "計概第一章(更新版)_fig_p009_01.png",
+      "width": 392,
+      "height": 350,
+      "extracted_at": "2025-10-15T15:19:48.582164",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 9,
+      "bbox": [
+        414.6000061035156,
+        294.02001953125,
+        550.2000122070312,
+        408.6200256347656
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p009_02.png",
+      "filename": "計概第一章(更新版)_fig_p009_02.png",
+      "width": 415,
+      "height": 349,
+      "extracted_at": "2025-10-15T15:19:48.600115",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 10,
+      "bbox": [
+        247.75,
+        171.62001037597656,
+        364.1499938964844,
+        320.82000732421875
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p010_01.png",
+      "filename": "計概第一章(更新版)_fig_p010_01.png",
+      "width": 356,
+      "height": 456,
+      "extracted_at": "2025-10-15T15:19:48.626046",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 11,
+      "bbox": [
+        136.1999969482422,
+        161.50003051757812,
+        494.9000244140625,
+        341.85003662109375
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p011_01.png",
+      "filename": "計概第一章(更新版)_fig_p011_01.png",
+      "width": 1092,
+      "height": 549,
+      "extracted_at": "2025-10-15T15:19:48.708825",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 12,
+      "bbox": [
+        480.70001220703125,
+        105.90000915527344,
+        579.677001953125,
+        237.70001220703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p012_01.png",
+      "filename": "計概第一章(更新版)_fig_p012_01.png",
+      "width": 244,
+      "height": 325,
+      "extracted_at": "2025-10-15T15:19:48.729769",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 12,
+      "bbox": [
+        396.8399963378906,
+        315.2400207519531,
+        609.239990234375,
+        511.9200134277344
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p012_02.png",
+      "filename": "計概第一章(更新版)_fig_p012_02.png",
+      "width": 74,
+      "height": 69,
+      "extracted_at": "2025-10-15T15:19:48.730777",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 12,
+      "bbox": [
+        412.20001220703125,
+        330.6300048828125,
+        578.030029296875,
+        482.41998291015625
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p012_03.png",
+      "filename": "計概第一章(更新版)_fig_p012_03.png",
+      "width": 379,
+      "height": 349,
+      "extracted_at": "2025-10-15T15:19:48.745727",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 12,
+      "bbox": [
+        251.9499969482422,
+        523.552001953125,
+        360.53997802734375,
+        744.7020263671875
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p012_04.png",
+      "filename": "計概第一章(更新版)_fig_p012_04.png",
+      "width": 331,
+      "height": 675,
+      "extracted_at": "2025-10-15T15:19:48.766450",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 13,
+      "bbox": [
+        63.79999923706055,
+        561.260009765625,
+        565.02001953125,
+        652.7100219726562
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p013_01.png",
+      "filename": "計概第一章(更新版)_fig_p013_01.png",
+      "width": 1414,
+      "height": 258,
+      "extracted_at": "2025-10-15T15:19:48.821272",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 14,
+      "bbox": [
+        118.80000305175781,
+        261.1400146484375,
+        542.0999755859375,
+        470.8900146484375
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p014_01.png",
+      "filename": "計概第一章(更新版)_fig_p014_01.png",
+      "width": 1293,
+      "height": 640,
+      "extracted_at": "2025-10-15T15:19:48.960931",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 15,
+      "bbox": [
+        436.3999938964844,
+        94.65000915527344,
+        479.60699462890625,
+        185.95001220703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p015_01.png",
+      "filename": "計概第一章(更新版)_fig_p015_01.png",
+      "width": 120,
+      "height": 253,
+      "extracted_at": "2025-10-15T15:19:48.974862",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 15,
+      "bbox": [
+        485.70001220703125,
+        94.65000915527344,
+        528.906982421875,
+        185.95001220703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p015_02.png",
+      "filename": "計概第一章(更新版)_fig_p015_02.png",
+      "width": 120,
+      "height": 253,
+      "extracted_at": "2025-10-15T15:19:48.977854",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 15,
+      "bbox": [
+        533.5900268554688,
+        94.65000915527344,
+        576.7969970703125,
+        185.95001220703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p015_03.png",
+      "filename": "計概第一章(更新版)_fig_p015_03.png",
+      "width": 120,
+      "height": 253,
+      "extracted_at": "2025-10-15T15:19:48.980845",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 15,
+      "bbox": [
+        339.75,
+        359.3200378417969,
+        541.3499755859375,
+        520.1700439453125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p015_04.png",
+      "filename": "計概第一章(更新版)_fig_p015_04.png",
+      "width": 451,
+      "height": 360,
+      "extracted_at": "2025-10-15T15:19:48.987827",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 15,
+      "bbox": [
+        89.0999984741211,
+        366.5500183105469,
+        304.4700012207031,
+        512.9500122070312
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p015_05.png",
+      "filename": "計概第一章(更新版)_fig_p015_05.png",
+      "width": 265,
+      "height": 180,
+      "extracted_at": "2025-10-15T15:19:48.992384",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 18,
+      "bbox": [
+        93.0,
+        287.4000244140625,
+        122.4000015258789,
+        310.5600280761719
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p018_01.png",
+      "filename": "計概第一章(更新版)_fig_p018_01.png",
+      "width": 81,
+      "height": 64,
+      "extracted_at": "2025-10-15T15:19:49.012335",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 18,
+      "bbox": [
+        145.1999969482422,
+        296.8800354003906,
+        383.03997802734375,
+        326.1600341796875
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p018_02.png",
+      "filename": "計概第一章(更新版)_fig_p018_02.png",
+      "width": 660,
+      "height": 81,
+      "extracted_at": "2025-10-15T15:19:49.015326",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 18,
+      "bbox": [
+        95.4000015258789,
+        461.6170349121094,
+        548.75,
+        711.20703125
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p018_03.png",
+      "filename": "計概第一章(更新版)_fig_p018_03.png",
+      "width": 1232,
+      "height": 678,
+      "extracted_at": "2025-10-15T15:19:49.054221",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 19,
+      "bbox": [
+        395.1499938964844,
+        579.3920288085938,
+        523.2999877929688,
+        745.3820190429688
+      ],
+      "file_path": "static\\charts\\計概第一章(更新版)_fig_p019_01.png",
+      "filename": "計概第一章(更新版)_fig_p019_01.png",
+      "width": 332,
+      "height": 430,
+      "extracted_at": "2025-10-15T15:19:49.105085",
+      "description": null,
+      "description_vector": null
+    }
+  ]
+}

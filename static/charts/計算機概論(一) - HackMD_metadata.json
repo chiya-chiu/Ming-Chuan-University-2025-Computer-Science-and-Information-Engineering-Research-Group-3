@@ -1,0 +1,168 @@
+{
+  "source_pdf": "pdfFiles\\計算機概論(一) - HackMD.pdf",
+  "extraction_time": "2025-10-15T15:23:28.953133",
+  "output_directory": "static\\charts",
+  "total_images": 10,
+  "images": [
+    {
+      "page": 4,
+      "bbox": [
+        35.39577865600586,
+        166.4153594970703,
+        481.552734375,
+        322.2599792480469
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p004_01.png",
+      "filename": "計算機概論(一) - HackMD_fig_p004_01.png",
+      "width": 647,
+      "height": 226,
+      "extracted_at": "2025-10-15T15:23:28.794578",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 8,
+      "bbox": [
+        79.52877044677734,
+        478.7943420410156,
+        441.5572204589844,
+        604.2975463867188
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p008_01.png",
+      "filename": "計算機概論(一) - HackMD_fig_p008_01.png",
+      "width": 525,
+      "height": 182,
+      "extracted_at": "2025-10-15T15:23:28.825501",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 9,
+      "bbox": [
+        35.39577865600586,
+        31.947662353515625,
+        485.0006103515625,
+        236.062744140625
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p009_01.png",
+      "filename": "計算機概論(一) - HackMD_fig_p009_01.png",
+      "width": 652,
+      "height": 296,
+      "extracted_at": "2025-10-15T15:23:28.852390",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 9,
+      "bbox": [
+        57.46227264404297,
+        673.94482421875,
+        447.0738525390625,
+        785.6564331054688
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p009_02.png",
+      "filename": "計算機概論(一) - HackMD_fig_p009_02.png",
+      "width": 565,
+      "height": 162,
+      "extracted_at": "2025-10-15T15:23:28.855382",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 10,
+      "bbox": [
+        35.39577865600586,
+        226.40859985351562,
+        328.4664306640625,
+        285.0227355957031
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p010_01.png",
+      "filename": "計算機概論(一) - HackMD_fig_p010_01.png",
+      "width": 425,
+      "height": 85,
+      "extracted_at": "2025-10-15T15:23:28.904251",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 10,
+      "bbox": [
+        35.39577865600586,
+        486.379638671875,
+        314.67486572265625,
+        547.0625
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p010_02.png",
+      "filename": "計算機概論(一) - HackMD_fig_p010_02.png",
+      "width": 405,
+      "height": 88,
+      "extracted_at": "2025-10-15T15:23:28.905248",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 11,
+      "bbox": [
+        35.39577865600586,
+        31.947189331054688,
+        331.914306640625,
+        101.59456634521484
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p011_01.png",
+      "filename": "計算機概論(一) - HackMD_fig_p011_01.png",
+      "width": 430,
+      "height": 101,
+      "extracted_at": "2025-10-15T15:23:28.916219",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 11,
+      "bbox": [
+        35.39577865600586,
+        302.9516906738281,
+        330.53515625,
+        370.53033447265625
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p011_02.png",
+      "filename": "計算機概論(一) - HackMD_fig_p011_02.png",
+      "width": 428,
+      "height": 98,
+      "extracted_at": "2025-10-15T15:23:28.918213",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 14,
+      "bbox": [
+        35.39577865600586,
+        387.7696838378906,
+        371.90985107421875,
+        546.3726196289062
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p014_01.png",
+      "filename": "計算機概論(一) - HackMD_fig_p014_01.png",
+      "width": 656,
+      "height": 309,
+      "extracted_at": "2025-10-15T15:23:28.945141",
+      "description": null,
+      "description_vector": null
+    },
+    {
+      "page": 14,
+      "bbox": [
+        35.39577865600586,
+        644.2930908203125,
+        357.4286804199219,
+        767.0379638671875
+      ],
+      "file_path": "static\\charts\\計算機概論(一) - HackMD_fig_p014_02.png",
+      "filename": "計算機概論(一) - HackMD_fig_p014_02.png",
+      "width": 467,
+      "height": 178,
+      "extracted_at": "2025-10-15T15:23:28.948134",
+      "description": null,
+      "description_vector": null
+    }
+  ]
+}
