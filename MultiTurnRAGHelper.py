@@ -236,7 +236,7 @@ class MultiTurnRAGHelper:
             raise ValueError("請先執行 load_and_prepare()")
 
         # 使用統一配置的 LLM
-        llm = get_chat_llm()
+        llm = ChatOpenAI(model="gpt-5-nano", temperature=0.1,)
 
         # 創建帶有相似度門檻的檢索器
         if similarity_threshold is not None:
