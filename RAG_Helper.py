@@ -165,12 +165,13 @@ class RAGHelper:
             use_enhanced_docs: 是否優先使用 enhanced_doc_*.txt（預處理後的增強文件）
             force_refresh: 是否強制重新載入，忽略快取
         """
+        """
         print("開始載入檔案...")
         if not force_refresh and self._is_cache_valid() and self._load_from_cache():
             self.is_loaded = True
             print("從缓存加載完成！")
             return
-
+        """
         if os.path.exists("my_faiss_index"):  # 如果本地有向量資料庫，載入本地的向量資料庫
             print("已偵測到現有向量資料庫，直接載入...")
             self.vectorstore = FAISS.load_local(
@@ -344,6 +345,7 @@ class RAGHelper:
             self._save_cache_metadata()
 
             print("✅ 已儲存到緩存")
+
 
     def _load_from_cache(self) -> bool:
         """從緩存載入資料"""

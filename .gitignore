@@ -13,7 +13,7 @@ rag_users.db
 __pycache__/
 *.pyc
 *.pyo
-my_faiss_index/
+#my_faiss_index/
 enhanced_faiss_index/
 trulens_env_new/
 

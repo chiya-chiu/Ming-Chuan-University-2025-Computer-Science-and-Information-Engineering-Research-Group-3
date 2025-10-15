@@ -194,7 +194,7 @@ class MultiTurnRAGHelper:
                 print("未發現 enhanced_doc 檔案，使用原始檔案處理流程...")
 
                 if file_extensions is None:
-                    file_extensions = ['.pdf']
+                    file_extensions = ['.txt']
 
                 for ext in file_extensions:
                     pattern = f"*{ext}"
@@ -331,7 +331,7 @@ class MultiTurnRAGHelper:
         # 簡化的檢索和回答邏輯
         docs = self.retrieve_documents(query, k=3, similarity_threshold=0.7)
 
-        llm = ChatOpenAI(model="gpt-5-nano", temperature=1)
+        llm = ChatOpenAI(model="gpt-5-nano", temperature=0.1)
 
         context = "\n\n".join([doc.page_content[:200] for doc in docs])
 

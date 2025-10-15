@@ -9,7 +9,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import List, Optional
-#from RAG_Helper import RAGHelper
 from MultiTurnRAGHelper import MultiTurnRAGHelper
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
@@ -872,7 +871,7 @@ async def ask_with_conversation(request: ConversationRequest, current_user: str 
                     for chart_id, chart_info in chart_data.items():
                         if 'generated_description' in chart_info:
                             if is_chart_relevant(chart_info, source_content):
-                                image_path = f"static/charts/enhanced_docs/{chart_id}.jpg"
+                                image_path = f"static/charts/{chart_id}.jpg"
 
                                 if os.path.exists(image_path):
                                     chart_images.append({
