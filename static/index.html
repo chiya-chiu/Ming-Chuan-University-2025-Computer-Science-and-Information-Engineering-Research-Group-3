@@ -498,18 +498,23 @@
                                         class="response-image chart-image" 
                                         style="max-width: 100%; height: auto; cursor: pointer; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
                                        onclick="openImageModal('${chart.image_url}')">
-                                    <h4 style="margin: 0 0 10px 0; color: #000000;">
-                                        ${chart.chart_number ? `圖 ${chart.chart_number}: ` : ''}${chart.caption}
-                                    </h4>
-                                    <p style="margin: 10px 0 0 0; font-size: 14px; color: #666; font-style: italic;">
-                                        ${chart.description}
-                                    </p>
+                                    
                                 </div>
                             `;
                         });
                         chartsHtml += '</div>';
                     }
+                   /*
+                        <h4 style="margin: 0 0 10px 0; color: #000000;">
+                                        ${chart.chart_number ? `圖 ${chart.chart_number}: ` : ''}${chart.caption}
+                                    </h4>
+                                    <p style="margin: 10px 0 0 0; font-size: 14px; color: #666; font-style: italic;">
+                                        ${chart.description}
+                                    </p>
+
+                   */
                     
+
                 } catch (e) {
                     console.error('解析圖表資料時發生錯誤：', e);
                     contentHtml = renderMarkdownWithMath(content);

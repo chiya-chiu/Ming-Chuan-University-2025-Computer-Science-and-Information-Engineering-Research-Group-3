@@ -49,8 +49,10 @@ from llm_config import LLMConfig
 sys.path.append(os.path.join(os.path.dirname(__file__), 'modules', 'pdf_Cutting_TextReplaceImage'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'modules', 'pdf_Cutting_TextReplaceImage', 'enhanced_version', 'backend'))
 
-# from pdf_chart_extractor import PDFChartExtractor  # 舊版，已封存為 pdf_chart_extractor_legacy.py
-from caption_extractor_sA import PDFCaptionContextProcessor
+# 階段 A 模組整合：Caption 識別 + 圖片萃取
+from pdf_chart_extractor import PDFChartExtractor  # 圖片萃取器
+# from caption_extractor_sA import PDFCaptionContextProcessor  # 舊版（整合了圖片萃取）
+from EX_caption_extractor_sA import PDFCaptionContextProcessor  # 強化版 Caption 識別（避免吃到下一個 caption、支援短標題與表格引用）
 
 
 class PreprocessLogger:
@@ -202,8 +204,8 @@ class PDFPreprocessor:
     def __init__(
             self,
             pdf_folder: str = "./pdfFiles",
-            output_folder: str = "./pdfFiles/enhanced_docs",  # 修正：統一存放在子資料夾
-            charts_folder: str = "./pdfFiles/charts",  # 修正：改為 pdfFiles/charts
+            output_folder: str = "./pdfFiles/enhanced_docs",  # enhanced 文檔放在子資料夾
+            charts_folder: str = "./static/charts",  # 修正：改為 static/charts，與 web 統一
             use_mock_llm: bool = False,
             logger: Optional[PreprocessLogger] = None
     ):
@@ -227,6 +229,9 @@ class PDFPreprocessor:
         self.output_folder.mkdir(parents=True, exist_ok=True)
         self.charts_folder.mkdir(parents=True, exist_ok=True)
 
+        # 清理舊的圖片檔案(避免重複和覆蓋問題)
+        self._cleanup_old_charts()
+
         # 初始化檔案變更偵測器
         self.change_detector = FileChangeDetector()
 
@@ -240,6 +245,24 @@ class PDFPreprocessor:
             "total_api_calls": 0,
             "start_time": datetime.now()
         }
+
+    def _cleanup_old_charts(self):
+        """清理舊的圖片檔案，避免重複和覆蓋問題"""
+        if self.charts_folder.exists():
+            chart_files = list(self.charts_folder.glob("*.jpg")) + \
+                         list(self.charts_folder.glob("*.png")) + \
+                         list(self.charts_folder.glob("*.jpeg"))
+            if chart_files:
+                self.logger.info(f"🧹 清理 {len(chart_files)} 個舊圖表檔案...")
+                for chart_file in chart_files:
+                    try:
+                        chart_file.unlink()
+                        self.logger.debug(f"  已刪除: {chart_file.name}")
+                    except Exception as e:
+                        self.logger.warning(f"無法刪除 {chart_file.name}: {e}")
+                self.logger.success("清理完成")
+            else:
+                self.logger.info("圖表目錄是空的，無需清理")
 
     def get_pdf_files(self) -> List[Path]:
         """取得所有 PDF 檔案"""
@@ -262,24 +285,39 @@ class PDFPreprocessor:
         self.logger.info(f"{'=' * 60}")
 
         try:
-            # 使用 PDFCaptionContextProcessor（階段 A 完整版）
-            extractor = PDFCaptionContextProcessor(
+            # === 步驟 1: 使用 EX_caption_extractor_sA 識別 Caption ===
+            caption_processor = PDFCaptionContextProcessor(
                 context_window=200,
                 min_caption_length=5,
                 confidence_threshold=0.3
             )
 
-            # 處理 PDF 並擷取圖表（包含 Caption 識別）
-            caption_pairs = extractor.process_pdf(
-                str(pdf_path),
-                use_image_guided_search=True,
-                charts_output_dir=str(self.charts_folder)
+            # 處理 PDF，識別 Caption 和上下文
+            caption_pairs = caption_processor.process_pdf(str(pdf_path))
+
+            self.logger.info(f"識別到 {len(caption_pairs)} 個 Caption")
+
+            # === 步驟 2: 使用 PDFChartExtractor 萃取圖片 ===
+            chart_extractor = PDFChartExtractor(
+                output_dir=str(self.charts_folder),
+                filename_prefix=pdf_path.stem  # 使用 PDF 名稱作為前綴
             )
 
-            # 轉換為 metadata 格式
+            # 萃取所有圖片
+            extraction_result = chart_extractor.extract_images_from_pdf(str(pdf_path))
+
+            if extraction_result.get("success"):
+                self.logger.info(f"萃取了 {extraction_result['total_images']} 張圖片")
+            else:
+                self.logger.warning(f"圖片萃取失敗: {extraction_result.get('error', '未知錯誤')}")
+
+            # 轉換為 metadata 格式 (修正：使用實際生成的檔名格式)
             chart_metadata = {}
             for i, pair in enumerate(caption_pairs, 1):
-                chart_id = f"{pdf_path.stem}_chart_{i}"
+                # 使用與 PDFChartExtractor 一致的檔名格式
+                # PDFChartExtractor 生成: {prefix}_fig_p{page:03d}_{index:02d}.png
+                page_num = pair.caption.page_number
+                chart_id = f"{pdf_path.stem}_fig_p{page_num:03d}_{i:02d}"
                 chart_metadata[chart_id] = {
                     "chart_id": chart_id,
                     "chart_type": pair.caption.caption_type,
@@ -513,18 +551,35 @@ class PDFPreprocessor:
             # 階段 C: 增強文檔生成
             enhanced_docs = self.stage_c_generate_enhanced_docs(pdf_path, chart_metadata)
 
-            # 儲存 chart_metadata.json
-            metadata_path = self.output_folder / "chart_metadata.json"
+            # 儲存 chart_metadata.json (修正：存放在 pdfFiles 根目錄，方便 web 讀取)
+            metadata_path = self.pdf_folder / "chart_metadata.json"
 
-            # 如果已存在，則合併
+            # 讀取現有的 metadata（如果存在）
+            all_metadata = {}
             if metadata_path.exists():
-                with open(metadata_path, 'r', encoding='utf-8') as f:
-                    existing_metadata = json.load(f)
-                existing_metadata.update(chart_metadata)
-                chart_metadata = existing_metadata
+                try:
+                    with open(metadata_path, 'r', encoding='utf-8') as f:
+                        all_metadata = json.load(f)
+                    self.logger.debug(f"載入現有 metadata: {len(all_metadata)} 筆")
+                except Exception as e:
+                    self.logger.warning(f"無法載入現有 metadata: {e}")
+                    all_metadata = {}
 
+            # 移除此 PDF 的舊資料（避免殘留）
+            pdf_prefix = pdf_path.stem
+            old_count = len(all_metadata)
+            all_metadata = {k: v for k, v in all_metadata.items() if not k.startswith(pdf_prefix)}
+            removed_count = old_count - len(all_metadata)
+            if removed_count > 0:
+                self.logger.info(f"移除 {removed_count} 筆舊的 {pdf_prefix} 資料")
+
+            # 添加新資料
+            all_metadata.update(chart_metadata)
+            self.logger.info(f"新增 {len(chart_metadata)} 筆資料，總計 {len(all_metadata)} 筆")
+
+            # 寫回檔案
             with open(metadata_path, 'w', encoding='utf-8') as f:
-                json.dump(chart_metadata, f, ensure_ascii=False, indent=2)
+                json.dump(all_metadata, f, ensure_ascii=False, indent=2)
 
             # 更新檔案快取
             self.change_detector.update_file(pdf_path, {
@@ -615,12 +670,12 @@ def main():
     parser.add_argument(
         "--output-folder",
         default="./pdfFiles/enhanced_docs",
-        help="輸出目錄 (預設: ./pdfFiles/enhanced_docs)"
+        help="Enhanced 文檔輸出目錄 (預設: ./pdfFiles/enhanced_docs)"
     )
     parser.add_argument(
         "--charts-folder",
-        default="./pdfFiles/charts",
-        help="圖表圖片目錄 (預設: ./pdfFiles/charts)"
+        default="./static/charts",
+        help="圖表圖片目錄 (預設: ./static/charts)"
     )
     parser.add_argument(
         "--use-mock",
