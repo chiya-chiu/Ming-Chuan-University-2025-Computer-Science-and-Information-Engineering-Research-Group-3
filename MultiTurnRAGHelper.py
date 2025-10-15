@@ -331,7 +331,7 @@ class MultiTurnRAGHelper:
         # 簡化的檢索和回答邏輯
         docs = self.retrieve_documents(query, k=3, similarity_threshold=0.7)
 
-        llm = ChatOpenAI(model="gpt-5-nano", temperature=0.1)
+        llm = ChatOpenAI(model="gpt-5-nano")
 
         context = "\n\n".join([doc.page_content[:200] for doc in docs])
 

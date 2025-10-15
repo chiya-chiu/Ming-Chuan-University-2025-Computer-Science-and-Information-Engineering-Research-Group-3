@@ -39,7 +39,7 @@ class LLMConfig:
     # ==================== 問答系統 LLM 配置 ====================
     # 用於 main_web.py 的對話問答
     QA_MODEL_NAME = os.getenv("QA_MODEL_NAME", "gpt-5-nano")
-    #QA_TEMPERATURE = float(os.getenv("QA_TEMPERATURE", "1"))
+    QA_TEMPERATURE = float(os.getenv("QA_TEMPERATURE", "1"))
     QA_MAX_TOKENS = int(os.getenv("QA_MAX_TOKENS", "2000"))
 
     # ==================== Embedding 模型配置 ====================
@@ -251,7 +251,7 @@ def get_chat_llm(model: Optional[str] = None, temperature: Optional[float] = Non
 
     return ChatOpenAI(
         model=model or LLMConfig.QA_MODEL_NAME,
-        #temperature=temperature if temperature is not None else LLMConfig.QA_TEMPERATURE,
+        temperature=temperature if temperature is not None else LLMConfig.QA_TEMPERATURE,
         openai_api_key=LLMConfig.OPENAI_API_KEY,
         openai_api_base=LLMConfig.OPENAI_BASE_URL
     )
