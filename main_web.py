@@ -89,7 +89,9 @@ def init_database():
             password_hash VARCHAR(255) NOT NULL,      -- 密碼的 SHA256 雜湊值
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 註冊時間 使用 PostgreSQL 語法
             is_active BOOLEAN DEFAULT TRUE,           -- 是否啟用
-            is_admin BOOLEAN DEFAULT FALSE            -- 是否為管理員
+            is_admin BOOLEAN DEFAULT FALSE,            -- 是否為管理員
+            points INTEGER DEFAULT 0,              -- 新增：積分
+            last_question_date DATE                -- 新增：最後提問日期
         )
     ''')
 
@@ -177,6 +179,7 @@ class UserStats(BaseModel):
     total_questions: int
     questions_today: int
     avg_response_time: float
+    points: int
 
 class ChatHistoryItem(BaseModel):
     question: str
@@ -288,6 +291,87 @@ def is_chart_relevant(chart_info, source_content):
 
     return (any(keyword in source_content for keyword in description_keywords) or
             any(keyword in source_content for keyword in caption_keywords))
+
+
+def add_points(user_id: str, points: int):
+    """為使用者增加積分"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE users 
+        SET points = points + %s 
+        WHERE user_id = %s
+    ''', (points, user_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def check_daily_question_bonus(user_id: str):
+    """檢查並發放每日首次提問獎勵 + 每 5 題獎勵"""
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        today = datetime.now().date()
+
+        # 先取得使用者資料
+        cursor.execute('''
+            SELECT last_question_date
+            FROM users 
+            WHERE user_id = %s
+        ''', (user_id,))
+
+        result = cursor.fetchone()
+        if not result:
+            print(f"找不到使用者: {user_id}")
+            return
+
+        last_question_date = result['last_question_date']
+        points_to_add = 0
+
+        # 每日首次提問獎勵 1 分
+        if not last_question_date or last_question_date != today:
+            points_to_add += 1
+            cursor.execute('UPDATE users SET last_question_date = %s WHERE user_id = %s', (today, user_id))
+            conn.commit()  # 立即提交
+
+        # 分開查詢今天的提問次數
+        cursor.execute('''
+            SELECT COUNT(*) as count
+            FROM questions_log 
+            WHERE user_id = %s AND DATE(created_at) = CURRENT_DATE
+        ''', (user_id,))
+
+        today_count = cursor.fetchone()['count']
+
+        # 每累積 5 題再得 1 分（包含這次提問後，所以是 +1）
+        if (today_count + 1) % 5 == 0:
+            points_to_add += 1
+
+        # 發放積分
+        if points_to_add > 0:
+            cursor.execute('''
+                UPDATE users 
+                SET points = points + %s 
+                WHERE user_id = %s
+            ''', (points_to_add, user_id))
+            conn.commit()
+            print(f"成功為 {user_id} 加 {points_to_add} 分")
+
+    except Exception as e:
+        print(f"積分檢查錯誤: {e}")
+        import traceback
+        traceback.print_exc()
+
+    finally:
+        # 確保資料庫連線關閉
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 # API 端點
 
@@ -493,13 +577,18 @@ async def get_user_stats(current_user: str = Depends(get_current_user)):
     result = cursor.fetchone()
     avg_response_time = float(result['avg']) if result['avg'] else 0.0
 
+    # 新增：查詢使用者積分
+    cursor.execute("SELECT points FROM users WHERE user_id = %s", (current_user,))
+    user_points = cursor.fetchone()['points']
+
     cursor.close()
     conn.close()
 
     return UserStats(
         total_questions=total_questions,
         questions_today=questions_today,
-        avg_response_time=round(avg_response_time, 2)
+        avg_response_time=round(avg_response_time, 2),
+        points = user_points  # 新增這行
     )
 
 @app.get("/admin/stats")
@@ -851,6 +940,8 @@ async def ask_with_conversation(request: ConversationRequest, current_user: str 
     conversation_id = request.conversation_id or current_user
 
     try:
+        check_daily_question_bonus(current_user) #檢查加分
+
         start_time = datetime.now()
         # 使用帶記憶的問答功能
         answer, sources = rag_instance.ask_with_memory(request.question, conversation_id)
@@ -1013,6 +1104,16 @@ async def get_active_conversations(current_user: str = Depends(get_current_user)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"獲取對話列表時發生錯誤：{str(e)}")
+
+@app.get("/points")
+async def get_user_points(current_user: str = Depends(get_current_user)):
+    """查詢使用者積分"""
+    user = get_user_from_db(user_id=current_user)
+    return {
+        "points": user['points'],
+        "username": user['username']
+    }
+
 
 if __name__ == "__main__":
     import uvicorn

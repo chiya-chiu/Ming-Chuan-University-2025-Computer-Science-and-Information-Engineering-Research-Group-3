@@ -79,7 +79,7 @@
                     </font>
                 </div>
                 <div class="user-actions">
-                    <button class="clear-history-btn" onclick="clearChatHistory()">清除歷史紀錄</button>
+                    <!--<button class="clear-history-btn" onclick="clearChatHistory()">清除歷史紀錄</button>-->
                     <button class="logout-btn" onclick="logout()">登出</button>
                 </div>
             </div>
@@ -349,9 +349,10 @@
 
                 if (res.ok) {
                     document.getElementById('userStatsContent').innerHTML = `
+                    ✨ 好棒棒點數：${data.points} 點 <br> 
                     👤 總提問次數：${data.total_questions} <br>
                     📅 今日提問次數：${data.questions_today} <br>
-                    🗨️ 平均回應時間：${data.avg_response_time} 秒 <br>   
+                    🗨️ 平均回應時間：${data.avg_response_time} 秒 <br>    
                     `;
                     //🧠 常見主題：${data.most_asked_topics.join(', ')}  
                 } else {
