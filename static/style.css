@@ -753,8 +753,8 @@ h1 {
     .main-layout {
         flex-direction: column !important;
         padding: 0 !important;
-        height: 100vh !important;
-        height: 100dvh !important; /* 使用動態視窗高度，更好的手機支援 */
+        height: 100vh ;
+        height: 100dvh ;
         gap: 0 !important;
         overflow: hidden !important; /* 防止頁面滾動 */
     }
@@ -874,7 +874,350 @@ h1 {
         display: flex !important;
         flex-direction: column !important;
         position: relative !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    
+    /* 聊天容器 - 優化滾動體驗 */
+    .main-content .container {
+        padding: 0 !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
         overflow: hidden !important;
+    }
+    
+    .main-content .chat-container {
+        flex: 1 !important;
+        height: 100% !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    /* 聊天訊息區域 - iOS式平滑滾動 */
+    .main-content .chat-messages {
+        padding: 16px 12px 20px 12px !important; /* 上下增加空間 */
+        font-size: 15px !important;
+        flex: 1 !important;
+        height: calc(100% - 80px) !important; /* 為輸入區預留更多空間 */
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        display: block !important;
+        -webkit-overflow-scrolling: touch !important; /* iOS平滑滾動 */
+        scroll-behavior: smooth !important;
+        overscroll-behavior: contain !important; /* 防止過度滾動 */
+    }
+    
+    /* 優化滾動條樣式 */
+    .main-content .chat-messages::-webkit-scrollbar {
+        width: 3px !important;
+    }
+    
+    .main-content .chat-messages::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    
+    .main-content .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* 訊息樣式 - 現代氣泡設計 */
+    .message {
+        margin-bottom: 16px !important; /* 增加訊息間距 */
+    }
+    
+    .message-content {
+        max-width: 80% !important; /* 稍微放寬最大寬度 */
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+        word-wrap: break-word !important;
+        hyphens: auto !important; /* 自動斷詞 */
+    }
+    
+    .user-message .message-content {
+        padding: 12px 16px !important; /* 增加內邊距 */
+        border-radius: 20px 20px 6px 20px !important; /* 更現代的圓角 */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important; /* 輕微陰影 */
+    }
+    
+    .bot-message .message-content {
+        padding: 12px 16px !important;
+        border-radius: 20px 20px 20px 6px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        border: 0.5px solid rgba(0,0,0,0.05) !important; /* 精細邊框 */
+    }
+    
+    /* 時間戳記優化 */
+    .message-time {
+        font-size: 11px !important;
+        margin-top: 4px !important;
+        color: #ffffff !important;
+        font-weight: 400 !important;
+    }
+    
+    /* 輸入區域 - 現代浮動設計 */
+    .main-content .input-group {
+        position: sticky !important;
+        bottom: 0 !important;
+        background: rgba(255, 255, 255, 0.124) !important;
+        /*backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
+        backdrop-filter: blur(10px);
+        border-top: 0.5px solid rgba(0, 0, 0, 0.177) !important;
+        padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px !important; /* 支援底部安全區域 */
+        margin: 0 !important;
+        z-index: 100 !important;
+        flex-shrink: 0 !important;
+        min-height: 68px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        align-items: flex-end !important;
+        gap: 10px !important;
+        box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.126) !important; /* 向上陰影 */
+    }
+    
+    /* 輸入框 - iOS風格設計 */
+    .main-content .question-input {
+        font-size: 16px !important;
+        padding: 12px 16px !important;
+        border-radius: 22px !important;
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        background: rgba(245,245,247,0.6) !important;
+        max-height: 100px !important;
+        min-height: 44px !important;
+        flex: 1 !important;
+        resize: none !important;
+        outline: none !important;
+        line-height: 1.4 !important;
+        transition: all 0.2s ease !important;
+        -webkit-appearance: none !important;
+    }
+    
+    /* 輸入框焦點狀態 */
+    .main-content .question-input:focus {
+        border-color: #007AFF !important; /* iOS藍色 */
+        background: rgba(255,255,255,0.9) !important;
+        box-shadow: 0 0 0 2px rgba(0,122,255,0.2) !important;
+    }
+    
+    /* 輸入框失去焦點後的狀態 - 新增這段 */
+    .main-content .input-group .question-input:not(:focus) {
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        background: rgba(245,245,247,0.6) !important;
+        box-shadow: none !important;
+    }
+
+    /* 發送按鈕 - iOS風格 */
+    .main-content .send-btn {
+        min-width: 44px !important; /* iOS標準觸控寬度 */
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+        border-radius: 22px !important; /* 完全圓形 */
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        flex-shrink: 0 !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    /* 發送按鈕狀態 */
+    .main-content .send-btn:active {
+        transform: scale(0.95) !important;
+    }
+    
+    .main-content .send-btn:disabled {
+        opacity: 0.5 !important;
+        transform: none !important;
+    }
+    
+    /* 載入指示器 - 現代設計 */
+    .main-content .loading-indicator {
+        margin: 8px 12px !important;
+        font-size: 14px !important;
+        padding: 12px !important;
+        text-align: center !important;
+        color: #666 !important;
+        background: rgba(0,0,0,0.03) !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    
+    .main-content .loading-indicator.show {
+        display: block !important;
+        animation: fadeIn 0.3s ease !important;
+    }
+    
+    /* 歡迎訊息優化 */
+    .main-content .welcome-message {
+        padding: 40px 20px !important;
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+        text-align: center !important;
+        color: #666 !important;
+        font-weight: 400 !important;
+    }
+    
+    /* 添加動畫效果 */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 訊息進入動畫 */
+    .message {
+        animation: fadeIn 0.3s ease !important;
+    }
+}
+
+ /* 平板橫向、筆電樣式 */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    /* 重設主體佈局 - 使用現代彈性布局 */
+
+    .chat-mode{
+        background: url('/static/background02.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    }   
+
+    .auth-mode{
+        background: url('/static/login-background02.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%)!important;
+    }
+
+    .main-layout {
+        flex-direction: column !important;
+        padding: 0 !important;
+        height: 100%;
+        min-height: 100vh;
+        gap: 0 !important;
+        overflow: hidden !important; /* 防止頁面滾動 */
+    }
+    
+    /* 頂部控制欄 - 採用安全區域設計 */
+    .stats-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        order: 1 !important;
+        flex-direction: column !important;
+        max-height: 70px !important; /* 減少高度，給聊天區更多空間 */
+        min-height: 70px !important;
+        /*padding: env(safe-area-inset-top, 8px) 12px 8px 12px !important; /* 支援瀏海屏安全區域 */ 
+        /*background: rgba(255,255,255,0.95) !important; /* 更好的對比度 */
+       /* backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
+        border-bottom: 0.5px solid rgba(0,0,0,0.1) !important; /* 更精細的分割線 */
+        gap: 0 !important;
+        overflow: visible !important;
+        box-shadow: 0 1px 10px rgba(0,0,0,0.05) !important; /* 輕微陰影增加層次 */
+        z-index: 1000 !important; /* 確保在最上層 */
+    }
+    
+    /* 隱藏不必要的區塊 - 使用更強的隱藏方式 */
+    .stats-sidebar .system-status-block,
+    .stats-sidebar .user-stats,
+    .stats-sidebar .admin-stats,
+    .stats-sidebar .character-container,
+    .stats-sidebar h1 {
+        display: none !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        left: -9999px !important; /* 完全移出視野 */
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+    }
+    
+    /* 用戶資訊區塊 - 現代卡片式設計 */
+    .stats-sidebar .user-info {
+        background: rgba(150, 150, 150, 0.177) ;
+        padding: 10px !important;
+        margin: 0 !important;
+        /*backdrop-filter: none !important;*/
+        border: none !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        height: 100% !important;
+        min-height: 54px !important; /* 符合觸控友好高度 */
+        border-radius: 0px;
+    }
+    
+    /* 用戶歡迎文字 - 優化可讀性 */
+    .user-info .user-welcome {
+        margin: 0 !important;
+        flex: 1 !important;
+        text-align: left !important;
+        line-height: 1.4 !important;
+        min-width: 0 !important; /* 允許文字截斷 */
+    }
+    
+    .user-info .user-welcome font {
+        font-size: 15px !important; /* 稍微增大，提高可讀性 */
+        color: #333 !important;
+        font-weight: 500 !important; /* 增加字重 */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* 長文字截斷 */
+    }
+    
+    /* 操作按鈕區域 - 觸控友好設計 */
+    .user-info .user-actions {
+        gap: 8px !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-shrink: 0 !important; /* 按鈕不縮小 */
+
+    }
+    
+    /* 按鈕樣式 - 符合iOS/Android設計規範 */
+    .user-info .clear-history-btn,
+    .user-info .logout-btn {
+        padding: 8px 14px !important; /* 稍微增大觸控區域 */
+        border: 50px ;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        border-radius: 20px !important; /* 更圓潤的現代設計 */
+        min-width: 100px !important; /* 最小觸控寬度 */
+        min-height: 36px !important; /* 最小觸控高度 */
+        flex: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        user-select: none !important; /* 防止文字選擇 */
+        -webkit-tap-highlight-color: transparent !important; /* 移除點擊高亮 */
+    }
+    
+    /* 按鈕懸停/點擊效果 */
+    .user-info .clear-history-btn:active,
+    .user-info .logout-btn:active {
+        transform: scale(0.95) !important;
+        opacity: 0.8 !important;
+    }
+    
+    /* 主聊天區域 - 現代全屏布局 */
+    .main-content {
+        order: 2 !important;
+        flex: 1 !important;
+        height: calc(100vh - 70px) !important;
+        height: calc(100dvh - 70px) !important; /* 動態視窗高度 */
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
     }
     
     /* 聊天容器 - 優化滾動體驗 */
@@ -1068,15 +1411,350 @@ h1 {
     
     /* 訊息進入動畫 */
     .message {
+        animation: fadeIn 0.3s ease ;
+    }
+}
+
+/* 平板橫向、筆電樣式 */
+@media (min-width: 768px) and (max-width: 1023px) {
+    /* 重設主體佈局 - 使用現代彈性布局 */
+
+    .chat-mode{
+        background: url('/static/background02.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+    }   
+
+    .auth-mode{
+        background: url('/static/login-background02.jpg') center/cover no-repeat fixed, linear-gradient(135deg, #2c3e50 0%, #34495e 100%)!important;
+    }
+
+    .main-layout {
+        flex-direction: column !important;
+        padding: 0 !important;
+        height: 100%;
+        min-height: 100vh;
+        gap: 0 !important;
+        overflow: hidden !important; /* 防止頁面滾動 */
+    }
+    
+    /* 頂部控制欄 - 採用安全區域設計 */
+    .stats-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        order: 1 !important;
+        flex-direction: column !important;
+        max-height: 70px !important; /* 減少高度，給聊天區更多空間 */
+        min-height: 70px !important;
+        /*padding: env(safe-area-inset-top, 8px) 12px 8px 12px !important; /* 支援瀏海屏安全區域 */ 
+        /*background: rgba(255,255,255,0.95) !important; /* 更好的對比度 */
+       /* backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
+        border-bottom: 0.5px solid rgba(0,0,0,0.1) !important; /* 更精細的分割線 */
+        gap: 0 !important;
+        overflow: visible !important;
+        box-shadow: 0 1px 10px rgba(0,0,0,0.05) !important; /* 輕微陰影增加層次 */
+        z-index: 1000 !important; /* 確保在最上層 */
+    }
+    
+    /* 隱藏不必要的區塊 - 使用更強的隱藏方式 */
+    .stats-sidebar .system-status-block,
+    .stats-sidebar .user-stats,
+    .stats-sidebar .admin-stats,
+    .stats-sidebar .character-container,
+    .stats-sidebar h1 {
+        display: none !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        left: -9999px !important; /* 完全移出視野 */
+        height: 0 !important;
+        width: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+    }
+    
+    /* 用戶資訊區塊 - 現代卡片式設計 */
+    .stats-sidebar .user-info {
+        background: rgba(150, 150, 150, 0.177) ;
+        padding: 10px !important;
+        margin: 0 !important;
+        /*backdrop-filter: none !important;*/
+        border: none !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        height: 100% !important;
+        min-height: 54px !important; /* 符合觸控友好高度 */
+        border-radius: 0px;
+    }
+    
+    /* 用戶歡迎文字 - 優化可讀性 */
+    .user-info .user-welcome {
+        margin: 0 !important;
+        flex: 1 !important;
+        text-align: left !important;
+        line-height: 1.4 !important;
+        min-width: 0 !important; /* 允許文字截斷 */
+    }
+    
+    .user-info .user-welcome font {
+        font-size: 15px !important; /* 稍微增大，提高可讀性 */
+        color: #333 !important;
+        font-weight: 500 !important; /* 增加字重 */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important; /* 長文字截斷 */
+    }
+    
+    /* 操作按鈕區域 - 觸控友好設計 */
+    .user-info .user-actions {
+        gap: 8px !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-shrink: 0 !important; /* 按鈕不縮小 */
+
+    }
+    
+    /* 按鈕樣式 - 符合iOS/Android設計規範 */
+    .user-info .clear-history-btn,
+    .user-info .logout-btn {
+        padding: 8px 14px !important; /* 稍微增大觸控區域 */
+        border: 50px ;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        border-radius: 20px !important; /* 更圓潤的現代設計 */
+        min-width: 100px !important; /* 最小觸控寬度 */
+        min-height: 36px !important; /* 最小觸控高度 */
+        flex: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        user-select: none !important; /* 防止文字選擇 */
+        -webkit-tap-highlight-color: transparent !important; /* 移除點擊高亮 */
+    }
+    
+    /* 按鈕懸停/點擊效果 */
+    .user-info .clear-history-btn:active,
+    .user-info .logout-btn:active {
+        transform: scale(0.95) !important;
+        opacity: 0.8 !important;
+    }
+    
+    /* 主聊天區域 - 現代全屏布局 */
+    .main-content {
+        order: 2 !important;
+        flex: 1 !important;
+        height: calc(100vh - 70px) !important;
+        height: calc(100dvh - 70px) !important; /* 動態視窗高度 */
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+    
+    /* 聊天容器 - 優化滾動體驗 */
+    .main-content .container {
+        padding: 0 !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .main-content .chat-container {
+        flex: 1 !important;
+        height: 100% !important;
+        margin: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    /* 聊天訊息區域 - iOS式平滑滾動 */
+    .main-content .chat-messages {
+        padding: 16px 12px 20px 12px !important; /* 上下增加空間 */
+        font-size: 15px !important;
+        flex: 1 !important;
+        height: calc(100% - 80px) !important; /* 為輸入區預留更多空間 */
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        display: block !important;
+        -webkit-overflow-scrolling: touch !important; /* iOS平滑滾動 */
+        scroll-behavior: smooth !important;
+        overscroll-behavior: contain !important; /* 防止過度滾動 */
+    }
+    
+    /* 優化滾動條樣式 */
+    .main-content .chat-messages::-webkit-scrollbar {
+        width: 3px !important;
+    }
+    
+    .main-content .chat-messages::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    
+    .main-content .chat-messages::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2) !important;
+        border-radius: 10px !important;
+    }
+    
+    /* 訊息樣式 - 現代氣泡設計 */
+    .message {
+        margin-bottom: 16px !important; /* 增加訊息間距 */
+    }
+    
+    .message-content {
+        max-width: 80% !important; /* 稍微放寬最大寬度 */
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+        word-wrap: break-word !important;
+        hyphens: auto !important; /* 自動斷詞 */
+    }
+    
+    .user-message .message-content {
+        padding: 12px 16px !important; /* 增加內邊距 */
+        border-radius: 20px 20px 6px 20px !important; /* 更現代的圓角 */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important; /* 輕微陰影 */
+    }
+    
+    .bot-message .message-content {
+        padding: 12px 16px !important;
+        border-radius: 20px 20px 20px 6px !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+        border: 0.5px solid rgba(0,0,0,0.05) !important; /* 精細邊框 */
+    }
+    
+    /* 時間戳記優化 */
+    .message-time {
+        font-size: 11px !important;
+        margin-top: 4px !important;
+        color: #ffffff !important;
+        font-weight: 400 !important;
+    }
+    
+    /* 輸入區域 - 現代浮動設計 */
+    .main-content .input-group {
+        position: sticky !important;
+        bottom: 0 !important;
+        background: rgba(255, 255, 255, 0.124) !important;
+        /*backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
+        backdrop-filter: blur(10px);
+        border-top: 0.5px solid rgba(0, 0, 0, 0.177) !important;
+        padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 12px !important; /* 支援底部安全區域 */
+        margin: 0 !important;
+        z-index: 100 !important;
+        flex-shrink: 0 !important;
+        min-height: 68px !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        align-items: flex-end !important;
+        gap: 10px !important;
+        box-shadow: 0 -1px 10px rgba(0, 0, 0, 0.126) !important; /* 向上陰影 */
+    }
+    
+    /* 輸入框 - iOS風格設計 */
+    .main-content .question-input {
+        font-size: 16px !important; /* 防止iOS自動縮放 */
+        padding: 12px 16px !important;
+        border-radius: 22px !important; /* 更圓潤 */
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        background: rgba(245,245,247,0.6) !important; /* iOS風格背景 */
+        max-height: 100px !important; /* 增加最大高度 */
+        min-height: 44px !important; /* iOS標準觸控高度 */
+        flex: 1 !important;
+        resize: none !important;
+        outline: none !important;
+        line-height: 1.4 !important;
+        transition: all 0.2s ease !important;
+        -webkit-appearance: none !important; /* 移除iOS預設樣式 */
+    }
+    
+    /* 輸入框焦點狀態 */
+    .main-content .question-input:focus {
+        border-color: #007AFF !important; /* iOS藍色 */
+        background: rgba(255,255,255,0.9) !important;
+        box-shadow: 0 0 0 2px rgba(0,122,255,0.2) !important;
+    }
+    
+    /* 發送按鈕 - iOS風格 */
+    .main-content .send-btn {
+        min-width: 44px !important; /* iOS標準觸控寬度 */
+        width: 44px !important;
+        height: 44px !important;
+        padding: 0 !important;
+        border-radius: 22px !important; /* 完全圓形 */
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        flex-shrink: 0 !important;
+        user-select: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+    
+    /* 發送按鈕狀態 */
+    .main-content .send-btn:active {
+        transform: scale(0.95) !important;
+    }
+    
+    .main-content .send-btn:disabled {
+        opacity: 0.5 !important;
+        transform: none !important;
+    }
+    
+    /* 載入指示器 - 現代設計 */
+    .main-content .loading-indicator {
+        margin: 8px 12px !important;
+        font-size: 14px !important;
+        padding: 12px !important;
+        text-align: center !important;
+        color: #666 !important;
+        background: rgba(0,0,0,0.03) !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    
+    .main-content .loading-indicator.show {
+        display: block !important;
         animation: fadeIn 0.3s ease !important;
+    }
+    
+    /* 歡迎訊息優化 */
+    .main-content .welcome-message {
+        padding: 40px 20px !important;
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+        text-align: center !important;
+        color: #666 !important;
+        font-weight: 400 !important;
+    }
+    
+    /* 添加動畫效果 */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 訊息進入動畫 */
+    .message {
+        animation: fadeIn 0.3s ease ;
     }
 }
 
 /* 超小螢幕優化 (iPhone SE等) */
 @media (max-width: 380px) {
     .stats-sidebar {
-        max-height: 65px !important;
-        min-height: 65px !important;
+        max-height: 65px ;
+        min-height: 65px ;
         padding: env(safe-area-inset-top, 6px) 10px 6px 10px !important;
     }
     

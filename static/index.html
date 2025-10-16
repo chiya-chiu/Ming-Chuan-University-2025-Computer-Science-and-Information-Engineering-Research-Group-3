@@ -797,6 +797,17 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
+        // 點擊非輸入區收起鍵盤
+        document.addEventListener('click', e => {
+        const input = document.querySelector('.question-input');
+        if (input && e.target !== input) input.blur();
+        });
+
+        // 修正平板/iOS 鍵盤遮擋問題
+        window.addEventListener('resize', () => {
+        document.querySelector('.main-layout').style.height = window.innerHeight + 'px';
+        });
+
     </script>
 </body>
 </html>
