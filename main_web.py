@@ -347,8 +347,8 @@ def check_daily_question_bonus(user_id: str):
 
         today_count = cursor.fetchone()['count']
 
-        # 每累積 5 題再得 1 分（包含這次提問後，所以是 +1）
-        if (today_count + 1) % 5 == 0:
+        # 每累積 3 題再得 1 分（包含這次提問後，所以是 +1）
+        if (today_count + 1) % 3 == 0:
             points_to_add += 1
 
         # 發放積分
