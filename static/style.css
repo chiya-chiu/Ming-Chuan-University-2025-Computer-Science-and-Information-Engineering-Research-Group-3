@@ -765,8 +765,8 @@ h1 {
         min-width: 100% !important;
         order: 1 !important;
         flex-direction: column !important;
-        max-height: 70px !important; /* 減少高度，給聊天區更多空間 */
-        min-height: 70px !important;
+        max-height: 35px !important; /* 減少高度，給聊天區更多空間 */
+        min-height: 35px !important;
         /*padding: env(safe-area-inset-top, 8px) 12px 8px 12px !important; /* 支援瀏海屏安全區域 */ 
         /*background: rgba(255,255,255,0.95) !important; /* 更好的對比度 */
        /* backdrop-filter: blur(20px) saturate(180%) !important; /* iOS風格毛玻璃 */
@@ -805,7 +805,7 @@ h1 {
         align-items: center !important;
         justify-content: space-between !important;
         height: 100% !important;
-        min-height: 54px !important; /* 符合觸控友好高度 */
+        min-height: 5px !important; /* 符合觸控友好高度 */
         border-radius: 0px;
     }
     

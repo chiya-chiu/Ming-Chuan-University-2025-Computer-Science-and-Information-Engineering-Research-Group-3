@@ -406,6 +406,14 @@
             const question = questionInput.value.trim();
             if (!question) return;
 
+            // 檢查是否為命令
+            if (question === '!狀態' || question === '!s' || question === '!S') {
+                await handleStatusCommand();
+                questionInput.value = '';
+                questionInput.style.height = 'auto';
+                return;
+            }
+
             // 添加用戶訊息到聊天區（不含時間戳記，表示是新訊息）
             addMessage(question, 'user');
             questionInput.value = '';
@@ -718,6 +726,52 @@
 
         // 每20秒更換一次對話
         setInterval(updateCharacterDialogue, 20000);
+
+        // 處理 !狀態 命令
+        async function handleStatusCommand() {
+            // 添加用戶訊息
+            addMessage('顯示統計', 'user');
+            
+            // 顯示載入指示器
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const sendBtn = document.getElementById('sendBtn');
+            const questionInput = document.getElementById('questionInput');
+            loadingIndicator.classList.add('show');
+            sendBtn.disabled = true;
+            sendBtn.textContent = '查詢中...';
+            questionInput.disabled = true;
+            
+            try {
+                const res = await fetch('/stats', { headers: getAuthHeaders() });
+                const data = await res.json();
+
+                if (res.ok) {
+                    const statusMessage = `
+        📊 **您的學習統計報告**
+
+        ✨ 好棒棒點數: ${data.points} 點
+        💬 總提問次數: ${data.total_questions} 次
+        📅 今日提問次數: ${data.questions_today} 次
+        🗨️ 平均回應時間: ${data.avg_response_time} 秒
+
+        ---
+        💪 繼續保持學習熱情!每個問題都讓你更進步~
+                    `.trim();
+                    
+                    addMessage(statusMessage, 'bot');
+                } else {
+                    addMessage('❌ 無法取得狀態資訊,請稍後再試', 'bot');
+                }
+            } catch (error) {
+                addMessage(`❌ 查詢失敗: ${error.message}`, 'bot');
+            } finally {
+                loadingIndicator.classList.remove('show');
+                sendBtn.disabled = false;
+                sendBtn.textContent = '發送';
+                questionInput.disabled = false;
+                questionInput.focus();
+            }
+        }
 
         // 頁面載入時檢查登入狀態
         window.addEventListener('load', function() {
