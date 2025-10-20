@@ -407,7 +407,7 @@
             if (!question) return;
 
             // 檢查是否為命令
-            if (question === '!狀態' || question === '!s' || question === '!S') {
+            if (question === '!狀態' || question === '!s' || question === '!S' || question === '！s' || question === '！S' || question ==='！狀態') {
                 await handleStatusCommand();
                 questionInput.value = '';
                 questionInput.style.height = 'auto';
