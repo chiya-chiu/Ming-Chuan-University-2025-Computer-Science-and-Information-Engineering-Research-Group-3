@@ -116,6 +116,77 @@ def init_database():
     cursor.close()
     conn.close()    # 關閉連線
 
+def migrate_timezone_with_backup():
+    """帶備份的時區修正（只執行一次）"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 檢查是否已經執行過遷移
+        cursor.execute("""
+            SELECT COUNT(*) as count 
+            FROM information_schema.tables 
+            WHERE table_name = 'timezone_migration_done'
+        """)
+        
+        if cursor.fetchone()['count'] == 0:
+            print("🔧 開始時區遷移...")
+            
+            # 1. 建立備份表
+            print("   📦 建立備份...")
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users_backup_before_tz 
+                AS SELECT * FROM users
+            """)
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS questions_log_backup_before_tz 
+                AS SELECT * FROM questions_log
+            """)
+            
+            # 2. 設定時區
+            cursor.execute("SET TIME ZONE 'Asia/Taipei';")
+            
+            # 3. 更新舊資料（加 8 小時）
+            cursor.execute("""
+                UPDATE users 
+                SET created_at = created_at + INTERVAL '8 hours'
+            """)
+            users_count = cursor.rowcount
+            
+            cursor.execute("""
+                UPDATE questions_log 
+                SET created_at = created_at + INTERVAL '8 hours'
+            """)
+            questions_count = cursor.rowcount
+            
+            # 4. 建立標記表，防止重複執行
+            cursor.execute("""
+                CREATE TABLE timezone_migration_done (
+                    migrated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    note TEXT DEFAULT '時區已從 UTC 調整為 Asia/Taipei'
+                )
+            """)
+            cursor.execute("INSERT INTO timezone_migration_done VALUES (DEFAULT, DEFAULT)")
+            
+            conn.commit()
+            print(f"   ✅ 更新了 {users_count} 筆使用者資料")
+            print(f"   ✅ 更新了 {questions_count} 筆問答記錄")
+            print("   ✅ 備份已儲存至 users_backup_before_tz 和 questions_log_backup_before_tz")
+            print("✅ 時區遷移完成！")
+        else:
+            print("ℹ️  時區已修正過，跳過遷移")
+            
+    except Exception as e:
+        print(f"❌ 遷移失敗: {e}")
+        if conn:
+            conn.rollback()
+        import traceback
+        traceback.print_exc()
+    finally:
+        if conn:
+            cursor.close()
+            conn.close()
 # 應用程式生命週期管理
 @asynccontextmanager
 async def lifespan(app: FastAPI):
