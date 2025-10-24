@@ -38,27 +38,42 @@ if not DATABASE_URL:
 def get_db_connection():
     """取得 PostgreSQL 資料庫連線"""
     try:
-        # 檢查是否為 Render 部署環境
+        if not DATABASE_URL:
+            raise ValueError("DATABASE_URL 環境變數未設定")
+        
+        print(f"🔗 嘗試連線到資料庫...")
+        
         if "render.com" in DATABASE_URL or "amazonaws.com" in DATABASE_URL:
-            # 雲端環境需要 SSL 連線
             conn = psycopg2.connect(
                 DATABASE_URL,
                 cursor_factory=RealDictCursor,
-                sslmode='require'
+                sslmode='require',
+                connect_timeout=10  # 加入逾時設定
             )
         else:
-            # 本地環境不需要 SSL 連線
             conn = psycopg2.connect(
                 DATABASE_URL,
                 cursor_factory=RealDictCursor,
-                sslmode='disable'  # 本地測試時停用 SSL
+                sslmode='disable',
+                connect_timeout=10
             )
         
         with conn.cursor() as cursor:
             cursor.execute("SET TIME ZONE 'Asia/Taipei';")
+        
+        print("✅ 資料庫連線成功")
         return conn
+        
+    except psycopg2.OperationalError as e:
+        print(f"❌ 資料庫連線失敗 (OperationalError): {e}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"無法連線到資料庫，請檢查 DATABASE_URL 設定: {str(e)}"
+        )
     except Exception as e:
-        print(f"資料庫連線失敗: {e}")
+        print(f"❌ 資料庫連線失敗: {e}")
+        import traceback
+        traceback.print_exc()
         raise e
 
 def test_db_connection():
@@ -190,17 +205,45 @@ def migrate_timezone_with_backup():
 # 應用程式生命週期管理
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 啟動時執行
-    print("🔧 初始化資料庫...")
-    test_db_connection()  # 測試連線
-    init_database()
-    print("✅ 資料庫初始化完成")
-
-    # 🆕 執行時區遷移（只會執行一次）
-    migrate_timezone_with_backup()
+    """應用程式生命週期管理"""
+    try:
+        print("🔧 正在啟動應用程式...")
+        
+        # 檢查環境變數
+        if not DATABASE_URL:
+            print("❌ 錯誤：未設定 DATABASE_URL")
+            raise ValueError("請在 .env 檔案中設定 DATABASE_URL")
+        
+        if not os.getenv("OPENAI_API_KEY"):
+            print("⚠️  警告：未設定 OPENAI_API_KEY，RAG 功能將無法使用")
+        
+        # 測試資料庫連線
+        print("🔧 測試資料庫連線...")
+        if not test_db_connection():
+            raise Exception("資料庫連線測試失敗")
+        
+        # 初始化資料庫
+        print("🔧 初始化資料庫結構...")
+        init_database()
+        print("✅ 資料庫初始化完成")
+        
+        # 執行時區遷移
+        print("🔧 檢查時區設定...")
+        migrate_timezone_with_backup()
+        
+        print("✅ 應用程式啟動完成！")
+        
+    except Exception as e:
+        print(f"❌ 應用程式啟動失敗: {e}")
+        import traceback
+        traceback.print_exc()
+        # 不要 raise，讓應用程式繼續運行（但功能可能受限）
+        print("⚠️  應用程式將以降級模式運行")
+    
     yield
-    # 關閉時執行（如果需要清理）
-
+    
+    # 關閉時執行清理
+    print("🔧 正在關閉應用程式...")
 #這就是後端網站的主體
 app = FastAPI(
     title="RAG 問答系統",
