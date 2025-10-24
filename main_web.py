@@ -53,6 +53,9 @@ def get_db_connection():
                 cursor_factory=RealDictCursor,
                 sslmode='disable'  # 本地測試時停用 SSL
             )
+        
+        with conn.cursor() as cursor:
+            cursor.execute("SET TIME ZONE 'Asia/Taipei';")
         return conn
     except Exception as e:
         print(f"資料庫連線失敗: {e}")
