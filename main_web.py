@@ -121,6 +121,9 @@ async def lifespan(app: FastAPI):
     test_db_connection()  # 測試連線
     init_database()
     print("✅ 資料庫初始化完成")
+
+    # 🆕 執行時區遷移（只會執行一次）
+    migrate_timezone_with_backup()
     yield
     # 關閉時執行（如果需要清理）
 
